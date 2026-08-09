@@ -1,0 +1,142 @@
+seed: 42
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  source_lang: en
+  target_lang: id
+  ccmatrix:
+    hf_dataset: yhavinga/ccmatrix
+    hf_config: en-id
+    # CCMatrix is ordered by LASER margin score; taking the first N pairs
+    # doubles as quality filtering. Adjust to your compute budget.
+    max_pairs: 2000000
+  flores:
+    hf_dataset: facebook/flores
+    hf_config: eng_Latn-ind_Latn
+    source_field: sentence_eng_Latn
+    target_field: sentence_ind_Latn
+  validation_size: 5000
+
+preprocessing:
+  # OpusFilter-style heuristics (Aulamo et al., 2020).
+  min_words: 1              # LengthFilter: keep segments with 1..max_words words
+  max_words: 100
+  max_length_ratio: 3.0     # LengthRatioFilter: drop pairs with len ratio > this
+  max_word_length: 40       # LongWordFilter: drop pairs with any word > this many chars
+  # Structural symbols whose count must match between source and target; a
+  # mismatch signals a broken/misaligned pair (truncation, glued-on editorial
+  # notes, orphaned brackets). Brackets only -- quotes/apostrophes differ
+  # legitimately across en/id. Set to "" to disable the check.
+  symbol_check_chars: "()[]{}"
+  # Download from https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin
+  # and place at this path. If the file is missing, language filtering is skipped.
+  fasttext_lid_model: data/lid.176.bin
+  # CCMatrix is already an en-id parallel corpus ordered by LASER margin, so the
+  # language pair is trustworthy by construction. A high threshold dropped ~16M
+  # good pairs (fastText under-confident on short/mixed text). Relaxed to 0.3 so
+  # only clear language mismatches are removed.
+  language_confidence_threshold: 0.3
+
+tokenizer:
+  model_prefix: data/processed/spm_en_id
+  vocab_size: 32000
+  model_type: bpe
+  character_coverage: 1.0
+  split_digits: true
+  byte_fallback: true
+  # Fixed special token ids used everywhere downstream.
+  unk_id: 0
+  bos_id: 1
+  eos_id: 2
+  pad_id: 3
+  # SentencePiece training samples this many sentences from the corpus.
+  input_sentence_size: 5000000
+
+teacher:
+  # Sequence-level KD: the teacher translates the training sources once,
+  # and students train on (source, teacher_translation) pairs.
+  model_name: facebook/mbart-large-50-many-to-many-mmt
+  source_lang_code: en_XX
+  target_lang_code: id_ID
+  batch_size: 32
+  num_beams: 5
+  max_new_tokens: 128
+
+hyperparameter_search:
+  subset_fraction: 0.1
+  trial_epochs: 2
+  trial_validation_size: 2000
+  grids:
+    gru:
+      embedding_dim: [256, 512]
+      hidden_dim: [512, 1024]
+      num_layers: [2, 4]
+      dropout: [0.2]
+      learning_rate: [0.001, 0.0005]
+      batch_size: [64, 128]
+    lstm:
+      embedding_dim: [256, 512]
+      hidden_dim: [512, 1024]
+      num_layers: [2, 4]
+      dropout: [0.2]
+      learning_rate: [0.001, 0.0005]
+      batch_size: [64, 128]
+    transformer:
+      d_model: [256, 512]
+      num_heads: [4, 8]
+      num_layers: [3, 6]
+      ffn_dim: [1024, 2048]
+      dropout: [0.1]
+      learning_rate: [0.0005, 0.0003]
+      batch_size: [64, 128]
+
+training:
+  epochs: 20
+  weight_decay: 0.01
+  label_smoothing: 0.1
+  grad_clip: 1.0
+  early_stopping_patience: 3
+  max_sequence_length: 128
+  num_workers: 2
+
+quantization:
+  # Asymmetric per-tensor uint8 fake quantization (QAT), applied to nn.Linear layers.
+  observer_momentum: 0.99
+
+pruning:
+  # Gradual, unstructured, per-tensor magnitude pruning of nn.Linear weights
+  # (model/pruning.py), enabled with --prune. Composes with --qat in one run.
+  target_sparsity: 0.5        # final fraction of Linear weights zeroed
+  # Schedule as fractions of the planned total steps (steps_per_epoch * epochs):
+  # a short dense warm-up, then a cubic ramp to target, then fine-tune at full
+  # sparsity for the remainder (the phase that recovers accuracy).
+  begin_step_fraction: 0.1
+  end_step_fraction: 0.7
+  update_frequency: 100       # recompute the mask every N optimizer steps
+  # NOTE: the ramp is anchored to the planned epoch count. If early stopping
+  # fires before end_step_fraction, target sparsity may not be reached. For
+  # aggressive sparsity, raise training.early_stopping_patience (or epochs) so
+  # the schedule completes and the model gets its post-ramp recovery phase.
+
+evaluation:
+  flores_split: devtest
+  decode_max_length: 128
+  decode_batch_size: 32
+  latency_warmup: 5
+  latency_repeats: 30
+  # Reported metrics: BLEU (surface precision) + METEOR (recall + morphology +
+  # synonymy). chrF++ is left implemented but OFF: it is another surface n-gram
+  # overlap metric, and METEOR's Sastrawi stemming already recovers the
+  # morphological credit chrF++ was there for -- so it is redundant here. Flip
+  # to true to report it again.
+  compute_chrf: false
+  # Indonesian-aware METEOR (Sastrawi stemmer + Wordnet Bahasa via OMW lang="ind";
+  # model/evaluation/meteor.py). Needs the nltk data, one time:
+  #   python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
+  compute_meteor: true
+
+coreml:
+  minimum_deployment_target: iOS16
+  max_source_length: 128
+  max_target_length: 128

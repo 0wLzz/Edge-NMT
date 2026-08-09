@@ -1,0 +1,34 @@
+{
+    "v1BrokenTranslation": [
+        {
+            "source": "I swear by them on every surface!",
+            "target": "“Maka Aku bersumpah: Demi segala (yang",
+            "detected": "id",
+            "confidence": 0.507
+        },
+        {
+            "source": "Swear to the earth that I will keep it,",
+            "target": "[1] Aku bersumpah dengan negeri (Makkah) ini;",
+            "detected": "id",
+            "confidence": 0.699
+        },
+        {
+            "source": "LastName, then by FirstName (on a LastName tie), then by OwnerID (on a",
+            "target": "qishah), perumpamanaan (al-matsal), sumpah (al-qasam), debat (al-jadal), dan",
+            "detected": "id",
+            "confidence": 0.292
+        },
+        {
+            "source": "By oath of the (particular) dawn.",
+            "target": "Maksudnya: Demi waktu fajar.",
+            "detected": "id",
+            "confidence": 0.695
+        },
+        {
+            "source": "[name of person] [sworn or affirmed] on [date].",
+            "target": "demi (diucapkan untuk bersumpah dalam ungkapan Arab)",
+            "detected": "en",
+            "confidence": 0.682
+        }
+    ]  
+}

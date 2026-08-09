@@ -1,0 +1,15 @@
+{
+  "total": 70545705,
+  "kept": 66832666,
+  "dropped": {
+    "symbol_mismatch": 3160345,
+    "target_language": 475864,
+    "length_ratio": 3480,
+    "duplicate": 69165,
+    "length": 95,
+    "long_word": 4009,
+    "source_language": 81
+  },
+  "train_size": 66827666,
+  "valid_size": 5000
+}

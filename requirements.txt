@@ -1,0 +1,20 @@
+torch>=2.2
+sentencepiece>=0.2.0
+datasets>=2.19
+transformers>=4.40
+sacrebleu>=2.4
+# METEOR (evaluation.compute_meteor): NLTK provides the metric + Wordnet Bahasa
+# (via Open Multilingual WordNet), Sastrawi provides Indonesian stemming.
+# One-time data download after install:
+#   python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
+nltk>=3.9
+Sastrawi>=1.0.1
+coremltools>=7.1
+pyyaml>=6.0
+# Pinned <2: fasttext-wheel's predict() uses np.array(..., copy=False), which
+# raises under numpy 2.x. numpy 1.26 is compatible with torch/coremltools here.
+numpy>=1.26,<2
+tqdm>=4.66
+# Optional: language-ID filtering in preprocessing (needs lid.176.bin, see README).
+# If it fails to build on your machine, preprocessing will skip that filter.
+fasttext-wheel>=0.9.2

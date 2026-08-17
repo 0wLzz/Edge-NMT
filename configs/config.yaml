@@ -11,8 +11,8 @@ data:
     # CCMatrix is ordered by LASER margin score; taking the first N pairs
     # doubles as quality filtering. Adjust to your compute budget.
     # Raw pairs downloaded for preprocessing. 2.3M provides headroom for
-    # cleaning losses while retaining exactly 2M training + 10k validation pairs.
-    max_pairs: 2300000
+    # cleaning losses while retaining exactly 2M training  10k testing pairs.
+    max_pairs: 2010000
   flores:
     hf_dataset: facebook/flores
     hf_config: eng_Latn-ind_Latn

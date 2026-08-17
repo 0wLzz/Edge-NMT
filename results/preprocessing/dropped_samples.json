@@ -101,6 +101,158 @@
       "target": "“Dan Aku bersumpah dengan nafs al-lawwamah (nafs yang menyesali diri).” – Q.S. Al-Qiyamah [75]: 2"
     }
   ],
+  "target_language": [
+    {
+      "source": "Allah says: “By the dawn.",
+      "target": "Allah berfirman,\"Demi waktu fajar.",
+      "detected": "id",
+      "confidence": 0.205
+    },
+    {
+      "source": "Of course they are right about Argentina.”",
+      "target": "Tentu saja mereka benar soal Argentina.”",
+      "detected": "id",
+      "confidence": 0.272
+    },
+    {
+      "source": "(Though in Greece and Spain, it’s only 10–20 euros per night.)",
+      "target": "(Walaupun di Greece dan Sepanyol, ia hanya 10-20 euro per malam.)",
+      "detected": "id",
+      "confidence": 0.29
+    },
+    {
+      "source": "Qaf; by oath of the Glorious Qur’an.(1)",
+      "target": "“Qaf, demi Al-Qur’an yang sangat mulia” (Q.S. : 50: 1)",
+      "detected": "id",
+      "confidence": 0.286
+    },
+    {
+      "source": "But the King swore an oath, saying, \"O savi!",
+      "target": "Mereka bersumpah di atas Al-Qur’an,” sahut Imran.",
+      "detected": "id",
+      "confidence": 0.27
+    },
+    {
+      "source": "Will There Be More Money Rains in 10 Schools, When?",
+      "target": "Bakal Ada Hujan Uang Lagi di 10 Sekolah, Kapan?",
+      "detected": "id",
+      "confidence": 0.232
+    },
+    {
+      "source": "Medical Supplies (",
+      "target": "Genetik Obat-obatan (",
+      "detected": "id",
+      "confidence": 0.165
+    },
+    {
+      "source": "thoughts” (",
+      "target": "Otisinalitas berpikir (",
+      "detected": "id",
+      "confidence": 0.184
+    },
+    {
+      "source": "Can Social Capital Explain Persistent Poverty Gaps? from the National Poverty Center",
+      "target": "Can Social Capital Explain Persistent Poverty Gaps? dari National Poverty Center",
+      "detected": "id",
+      "confidence": 0.29
+    },
+    {
+      "source": "004 Joe Don Baker is back.",
+      "target": "004 Joe Don Baker kembali.",
+      "detected": "id",
+      "confidence": 0.235
+    },
+    {
+      "source": "The first month, they are usually confused - somewhere lost.",
+      "target": "Bulan pertama, biasanya mereka bingung— somewhere lost.",
+      "detected": "id",
+      "confidence": 0.231
+    },
+    {
+      "source": "They’re waiting for you in Earth Court 1!”",
+      "target": "Mereka menunggumu di Earth Court 1! ”",
+      "detected": "id",
+      "confidence": 0.291
+    },
+    {
+      "source": "“Well, of course Miss Morstan too.",
+      "target": "\"Well, tentu saja Miss Morstan juga.",
+      "detected": "id",
+      "confidence": 0.29
+    },
+    {
+      "source": "I swear by the glorious Quran (that Muhammad is the Apostle of Allah) S. 50:1",
+      "target": "“Qaf, demi Al-Qur’an yang sangat mulia” (Q.S. : 50: 1)",
+      "detected": "id",
+      "confidence": 0.286
+    },
+    {
+      "source": "Chapter 2793 - Why Stop Him?",
+      "target": "Bab 2793 - Mengapa Hentikan Dia?",
+      "detected": "id",
+      "confidence": 0.257
+    },
+    {
+      "source": "The Life of Our Lord most clearly expresses Dickens’s religious disposition.",
+      "target": "\"The Life of Our Lord\" paling jelas mengungkapkan disposisi agama Dickens.",
+      "detected": "id",
+      "confidence": 0.29
+    },
+    {
+      "source": "teaching authority (",
+      "target": "Kurikulum berbasis kompetensi (",
+      "detected": "id",
+      "confidence": 0.214
+    },
+    {
+      "source": "Senior Luo Yan, did you really survive three minutes inside?",
+      "target": "Senior Luo Yan, apakah Anda benar-benar bertahan tiga menit di dalam?",
+      "detected": "id",
+      "confidence": 0.248
+    },
+    {
+      "source": "~200 against 5000, what kind of joke is that?",
+      "target": "~ 200 melawan 5000, lelucon macam apa itu?",
+      "detected": "id",
+      "confidence": 0.288
+    },
+    {
+      "source": "\"Like [George] Best, there is a special fantasia about him\"",
+      "target": "\"Seperti [George] Best, ada fantasi spesial tentang dirinya\"",
+      "detected": "id",
+      "confidence": 0.278
+    },
+    {
+      "source": "(Nike Accused of Lying About Asian Factories 1998).",
+      "target": "(Nike Dituduh berbohong tentang Asian Factories 1998).",
+      "detected": "id",
+      "confidence": 0.299
+    },
+    {
+      "source": "Hey you know Dr. Phil says I am afraid of commitment....",
+      "target": "Hei Anda tahu Dr. Phil bilang saya takut komitmen ....",
+      "detected": "ms",
+      "confidence": 0.317
+    },
+    {
+      "source": "... already mentioned (Be, know, do: leadership the Army way 2004).",
+      "target": "... sudah disebutkan (Be, know, do: leadership the Army way 2004).",
+      "detected": "id",
+      "confidence": 0.282
+    },
+    {
+      "source": "And yeah, Madrid is coming.",
+      "target": "Dan ya, Madrid datang.",
+      "detected": "id",
+      "confidence": 0.215
+    },
+    {
+      "source": "\"They keep talking, blablabla!",
+      "target": "\"Mereka terus berbicara, blablabla!",
+      "detected": "id",
+      "confidence": 0.239
+    }
+  ],
   "length_ratio": [
     {
       "source": "Believers are",

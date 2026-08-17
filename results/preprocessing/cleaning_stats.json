@@ -1,10 +1,11 @@
 {
-  "total": 2033487,
+  "total": 2038565,
   "kept": 2010000,
   "dropped": {
-    "symbol_mismatch": 21290,
+    "symbol_mismatch": 21356,
+    "target_language": 5011,
     "length_ratio": 55,
-    "duplicate": 2122,
+    "duplicate": 2123,
     "length": 2,
     "long_word": 18
   },

@@ -1,6 +1,8 @@
 torch>=2.2
 sentencepiece>=0.2.0
-datasets>=2.19
+# Pinned <3.0: datasets 3.x removed support for script-based datasets, which
+# breaks yhavinga/ccmatrix (loads via ccmatrix.py). 2.x keeps trust_remote_code.
+datasets>=2.19,<3.0
 transformers>=4.40
 sacrebleu>=2.4
 # METEOR (evaluation.compute_meteor): NLTK provides the metric + Wordnet Bahasa
@@ -10,6 +12,11 @@ sacrebleu>=2.4
 nltk>=3.9
 Sastrawi>=1.0.1
 coremltools>=7.1
+# Hyperparameter search (model/training/hyperparameter_search.py): Optuna drives
+# the TPE sampler + Hyperband pruner over a resumable SQLite study; torchinfo
+# prints the per-trial layer/param summary logged for each model.
+optuna>=3.6
+torchinfo>=1.8
 pyyaml>=6.0
 # Pinned <2: fasttext-wheel's predict() uses np.array(..., copy=False), which
 # raises under numpy 2.x. numpy 1.26 is compatible with torch/coremltools here.

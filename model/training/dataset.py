@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import functools
 from pathlib import Path
 
 import sentencepiece as spm
@@ -11,21 +12,29 @@ from torch.utils.data import Dataset
 
 from common.config import resolve_path
 
+import warnings
+warnings.filterwarnings("ignore")
 
 def load_tokenizer(cfg: dict) -> spm.SentencePieceProcessor:
     model_path = resolve_path(cfg["tokenizer"]["model_prefix"]).with_suffix(".model")
     tokenizer = spm.SentencePieceProcessor()
-    tokenizer.load(str(model_path))
+    tokenizer.Load(str(model_path))
     return tokenizer
+ 
 
-
-def read_pairs(tsv_path: Path) -> list[tuple[str, str]]:
+def read_pairs(tsv_path: Path, limit: int | None = None) -> list[tuple[str, str]]:
+    """Read (source, target) pairs. With `limit`, stop after that many valid
+    pairs -- train.tsv preserves CCMatrix's LASER-margin order, so the first N
+    rows are the highest-quality pairs and reading only those avoids loading the
+    full (multi-GB) file into memory."""
     pairs = []
     with open(tsv_path, newline="") as f:
         reader = csv.reader(f, delimiter="\t", quoting=csv.QUOTE_NONE, escapechar="\\")
         for row in reader:
             if len(row) == 2:
                 pairs.append((row[0], row[1]))
+                if limit is not None and len(pairs) >= limit:
+                    break
     return pairs
 
 
@@ -41,8 +50,9 @@ class TranslationDataset(Dataset):
         tsv_path: Path,
         tokenizer: spm.SentencePieceProcessor,
         max_length: int,
+        limit: int | None = None,
     ):
-        self.pairs = read_pairs(tsv_path)
+        self.pairs = read_pairs(tsv_path, limit=limit)
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.bos_id = tokenizer.bos_id()
@@ -62,16 +72,20 @@ class TranslationDataset(Dataset):
         return torch.tensor(source), torch.tensor(target)
 
 
-def make_collate_fn(pad_id: int):
-    def collate(batch):
-        sources, targets = zip(*batch)
-        source = torch.nn.utils.rnn.pad_sequence(
-            sources, batch_first=True, padding_value=pad_id
-        )
-        target = torch.nn.utils.rnn.pad_sequence(
-            targets, batch_first=True, padding_value=pad_id
-        )
-        # Teacher forcing: input drops the last token, labels drop BOS.
-        return source, target[:, :-1], target[:, 1:]
+def _collate(batch, pad_id: int):
+    sources, targets = zip(*batch)
+    source = torch.nn.utils.rnn.pad_sequence(
+        sources, batch_first=True, padding_value=pad_id
+    )
+    target = torch.nn.utils.rnn.pad_sequence(
+        targets, batch_first=True, padding_value=pad_id
+    )
+    # Teacher forcing: input drops the last token, labels drop BOS.
+    return source, target[:, :-1], target[:, 1:]
 
-    return collate
+
+def make_collate_fn(pad_id: int):
+    # A module-level function bound with partial (not a local closure) so the
+    # collate fn is picklable -- required for DataLoader num_workers > 0 under the
+    # macOS/Windows 'spawn' start method.
+    return functools.partial(_collate, pad_id=pad_id)

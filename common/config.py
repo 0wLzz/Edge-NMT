@@ -37,3 +37,10 @@ def pick_device() -> torch.device:
     if torch.backends.mps.is_available():
         return torch.device("mps")
     return torch.device("cpu")
+
+def getting_output_folder_name(args, target_sparsity: float) -> str:
+    run_name = f"{args.arch}_{args.data_mode}" + ("_qat" if args.qat else "")
+    if args.prune:
+        run_name += f"_prune{int(round(target_sparsity * 100))}"
+
+    return run_name

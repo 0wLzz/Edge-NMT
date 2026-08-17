@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
+from typing import Callable
 
 import torch
 import torch.nn as nn
@@ -10,6 +12,31 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from model.architectures.factory import save_checkpoint
+
+
+def build_lr_lambda(scheduler_cfg: dict, total_steps: int) -> Callable[[int], float]:
+    """LR multiplier as a function of global step: linear warmup then decay.
+
+    Returns a factor relative to the peak (optimizer) LR, so it composes with
+    LambdaLR. `total_steps` is the planned number of optimizer steps
+    (steps_per_epoch * epochs); early stopping may cut it short, which only
+    means the decay tail is not reached.
+    """
+    sched_type = scheduler_cfg.get("type", "none")
+    warmup_steps = max(1, int(scheduler_cfg.get("warmup_ratio", 0.0) * total_steps))
+    min_lr_ratio = scheduler_cfg.get("min_lr_ratio", 0.0)
+
+    def lr_lambda(step: int) -> float:
+        if step < warmup_steps:
+            return step / warmup_steps
+        if sched_type == "cosine":
+            progress = min(1.0, (step - warmup_steps) / max(1, total_steps - warmup_steps))
+            return min_lr_ratio + (1 - min_lr_ratio) * 0.5 * (1 + math.cos(math.pi * progress))
+        if sched_type == "inverse_sqrt":
+            return (warmup_steps ** 0.5) / (max(step, 1) ** 0.5)
+        return 1.0  # "none": constant after warmup
+
+    return lr_lambda
 
 
 class EarlyStopping:
@@ -50,6 +77,8 @@ class Trainer:
         checkpoint_meta: dict | None = None,
         quiet: bool = False,
         pruner=None,
+        scheduler_cfg: dict | None = None,
+        epoch_callback: Callable[[int, float], None] | None = None,
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -64,12 +93,26 @@ class Trainer:
         # sparsity and re-applies the weight mask after every optimizer step,
         # composing with QAT in the same one-shot run.
         self.pruner = pruner
+        # Optional callback run after each epoch's validation with
+        # (epoch, val_loss). The hyperparameter search passes one that reports to
+        # Optuna and raises optuna.TrialPruned to stop unpromising trials; keeping
+        # it a plain callback means the trainer never imports optuna.
+        self.epoch_callback = epoch_callback
         self.criterion = nn.CrossEntropyLoss(
             ignore_index=pad_id, label_smoothing=label_smoothing
         )
         self.optimizer = torch.optim.AdamW(
             model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
+        # LR schedule (linear warmup then decay), stepped every optimizer step.
+        # Anchored to the planned run length so warmup/decay are consistent
+        # between the search and the full runs.
+        self.scheduler = None
+        if scheduler_cfg and scheduler_cfg.get("type", "none") != "none":
+            total_steps = max(1, len(train_loader) * epochs)
+            self.scheduler = torch.optim.lr_scheduler.LambdaLR(
+                self.optimizer, build_lr_lambda(scheduler_cfg, total_steps)
+            )
         self.early_stopping = EarlyStopping(early_stopping_patience)
         self.history: list[dict] = []
         self.start_epoch = 1
@@ -93,6 +136,8 @@ class Trainer:
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
             self.optimizer.step()
+            if self.scheduler is not None:
+                self.scheduler.step()
             if self.pruner is not None:
                 self.pruner.step()
             total_loss += loss.item()
@@ -115,6 +160,7 @@ class Trainer:
                 "meta": self.checkpoint_meta,
                 "state_dict": self.model.state_dict(),
                 "optimizer": self.optimizer.state_dict(),
+                "scheduler": self.scheduler.state_dict() if self.scheduler else None,
                 "epoch": self.history[-1]["epoch"] if self.history else 0,
                 "best_loss": self.early_stopping.best_loss,
                 "bad_epochs": self.early_stopping.bad_epochs,
@@ -131,6 +177,8 @@ class Trainer:
         state = torch.load(path, map_location=self.device, weights_only=False)
         self.model.load_state_dict(state["state_dict"])
         self.optimizer.load_state_dict(state["optimizer"])
+        if self.scheduler is not None and state.get("scheduler") is not None:
+            self.scheduler.load_state_dict(state["scheduler"])
         self.early_stopping.best_loss = state["best_loss"]
         self.early_stopping.bad_epochs = state["bad_epochs"]
         self.history = state["history"]
@@ -150,6 +198,11 @@ class Trainer:
             if self.pruner is not None:
                 record["sparsity"] = round(self.pruner.current_sparsity(), 4)
             self.history.append(record)
+            # Report to any observer (e.g. Optuna) before early-stopping logic so
+            # a trial can be pruned on this epoch's val_loss. The callback may
+            # raise (optuna.TrialPruned) to abort the run.
+            if self.epoch_callback is not None:
+                self.epoch_callback(epoch, val_loss)
             is_best = self.early_stopping.step(val_loss)
             if not self.quiet:
                 marker = " *" if is_best else ""

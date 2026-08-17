@@ -17,7 +17,7 @@ Requires Python 3.9+. For the optional language-ID filter, download
 to `data/lid.176.bin` (preprocessing runs without it, skipping that filter).
 
 All commands run from this directory as modules (`python -m ...`). Every stage
-reads `configs/config.yaml`; tweak dataset size, grids, and training settings
+reads `configs/config.yaml`; tweak dataset size, search space, and training settings
 there rather than in code.
 
 ## Pipeline
@@ -39,8 +39,10 @@ python -m preprocessing_dataset.train_tokenizer
 #    Resumable: progress saved per batch; rerun the same command to continue.
 python -m model.training.generate_kd_dataset
 
-# 5. Grid search per architecture (10% subset, short trainings)
-#    -> results/hparam_search/best_<arch>.json
+# 5. Optuna hyperparameter search per architecture (TPE + Hyperband pruner,
+#    top-300k train slice, resumable SQLite study at results/hparam_search/<arch>.db)
+#    -> results/hparam_search/best_<arch>.json  (+ per-trial torchinfo summaries)
+#    n_trials in config is a TOTAL budget: rerun to continue after a Colab drop.
 python -m model.training.hyperparameter_search --arch gru
 python -m model.training.hyperparameter_search --arch lstm
 python -m model.training.hyperparameter_search --arch transformer
@@ -99,7 +101,7 @@ preprocessing_dataset/    Download, cleaning, split, tokenizer training
 model/
   architectures/          GRU / LSTM / Transformer + factory
   qat.py                  Asymmetric uint8 fake quantization (toggle on/off)
-  training/               Dataset, trainer, KD data generation, grid search, train CLI
+  training/               Dataset, trainer, KD data generation, Optuna search, train CLI
   evaluation/             BLEU + Indonesian METEOR (chrF++ optional), efficiency metrics, evaluate CLI
 quantization_coreml/      QAT folding, CoreML conversion, PyTorch-vs-CoreML verification
 results/                  Every run's outputs land here (see below)

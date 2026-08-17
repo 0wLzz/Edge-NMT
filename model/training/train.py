@@ -30,11 +30,12 @@ import argparse
 
 from torch.utils.data import DataLoader
 
-from common.config import load_config, pick_device, resolve_path, set_seed
+from common.config import load_config, pick_device, resolve_path, set_seed, getting_output_folder_name
 from common.results import RESULTS_DIR, create_run_dir, load_json, save_json
 from model.architectures.factory import build_model
 from model.pruning import MagnitudePruner
 from model.training.dataset import TranslationDataset, load_tokenizer, make_collate_fn
+from model.training.hyperparameter_search import default_hparams
 from model.training.trainer import Trainer
 
 
@@ -47,11 +48,13 @@ def find_resume_run_dir(resume: str | None, run_name: str):
     """
     if resume is None:
         return None
+    
     if resume != "latest":
         run_dir = resolve_path(resume)
         if not (run_dir / "run_config.json").exists():
             raise SystemExit(f"No run_config.json in {run_dir}; is this a run dir?")
         return run_dir
+    
     candidates = sorted(
         d
         for d in (RESULTS_DIR / "runs").glob(f"*_{run_name}")
@@ -67,10 +70,10 @@ def load_best_hparams(arch: str, cfg: dict, override_path: str | None) -> dict:
     best_path = RESULTS_DIR / "hparam_search" / f"best_{arch}.json"
     if best_path.exists():
         return load_json(best_path)["hparams"]
-    # Fall back to the first value of each grid entry.
-    grid = cfg["hyperparameter_search"]["grids"][arch]
-    print(f"[train] No search results at {best_path}; using grid defaults.")
-    return {key: values[0] for key, values in grid.items()}
+    # Fall back to a deterministic default drawn from the search space.
+    space = cfg["hyperparameter_search"]["search_space"][arch]
+    print(f"[train] No search results at {best_path}; using search-space defaults.")
+    return default_hparams(space)
 
 
 def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device):
@@ -125,19 +128,24 @@ def main() -> None:
     cfg = load_config(args.config)
     set_seed(cfg["seed"])
     device = pick_device()
+
+    # Loading SentencePiece Tokenizer
     tokenizer = load_tokenizer(cfg)
 
     prune_cfg = cfg.get("pruning", {})
+
+    # Setting Target Sparsity
     target_sparsity = (
         args.target_sparsity
         if args.target_sparsity is not None
         else prune_cfg.get("target_sparsity", 0.5)
     )
 
-    run_name = f"{args.arch}_{args.data_mode}" + ("_qat" if args.qat else "")
-    if args.prune:
-        run_name += f"_prune{int(round(target_sparsity * 100))}"
+    # Getting Run Name
+    run_name = getting_output_folder_name(args, target_sparsity)
+
     run_dir = find_resume_run_dir(args.resume, run_name)
+    # Getting Configurations and Hyperparameters 
     if run_dir is not None:
         meta = load_json(run_dir / "run_config.json")
         for key, value in (
@@ -145,6 +153,7 @@ def main() -> None:
             ("data_mode", args.data_mode),
             ("qat", args.qat),
             ("prune", args.prune),
+            ("target_sparsity", target_sparsity),
         ):
             if meta.get(key, False) != value:
                 raise SystemExit(
@@ -219,6 +228,7 @@ def main() -> None:
         run_dir=run_dir,
         checkpoint_meta=checkpoint_meta,
         pruner=pruner,
+        scheduler_cfg=cfg["training"].get("scheduler"),
     )
     last_state = run_dir / "last.pt"
     if args.resume and last_state.exists():

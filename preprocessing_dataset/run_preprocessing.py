@@ -1,8 +1,9 @@
-"""Clean the raw CCMatrix TSV and produce train/valid splits.
+"""Clean the raw CCMatrix TSV and produce fixed-size train/valid splits.
 
 Pipeline: unicode normalization -> length, ratio & long-word filters ->
 deduplication -> language-ID filtering (if lid.176.bin is present) ->
-reservoir-sampled validation split, streaming the rest to train.tsv.
+reservoir-sampled validation split, streaming the rest to train.tsv. Processing
+stops once the configured number of cleaned pairs has been retained.
 
 Memory-safe: kept pairs are written straight to disk instead of held in a
 list, and the validation set is drawn with reservoir sampling (O(valid_size)
@@ -85,7 +86,9 @@ def main() -> None:
     )
     cleaner = PairCleaner(cfg, lang_filter)
 
+    train_target = cfg["data"]["train_size"]
     validation_size = cfg["data"]["validation_size"]
+    retained_target = train_target + validation_size
     processed_dir.mkdir(parents=True, exist_ok=True)
     train_path = processed_dir / "train.tsv"
     valid_path = processed_dir / "valid.tsv"
@@ -112,9 +115,19 @@ def main() -> None:
                 else:
                     writer.writerow(pair)
             kept += 1
+            if kept >= retained_target:
+                break
 
     write_pairs_tsv(valid_path, reservoir)
     train_size = kept - len(reservoir)
+
+    if train_size != train_target or len(reservoir) != validation_size:
+        raise RuntimeError(
+            "Not enough clean pairs to meet the requested split: "
+            f"wanted {train_target} train + {validation_size} validation, "
+            f"got {train_size} train + {len(reservoir)} validation. "
+            "Download more raw CCMatrix pairs or omit a restrictive --limit."
+        )
 
     stats = cleaner.stats.as_dict()
     stats["train_size"] = train_size

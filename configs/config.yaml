@@ -10,13 +10,19 @@ data:
     hf_config: en-id
     # CCMatrix is ordered by LASER margin score; taking the first N pairs
     # doubles as quality filtering. Adjust to your compute budget.
-    max_pairs: 2000000
+    # Raw pairs downloaded for preprocessing. 2.3M provides headroom for
+    # cleaning losses while retaining exactly 2M training + 10k validation pairs.
+    max_pairs: 2300000
   flores:
     hf_dataset: facebook/flores
     hf_config: eng_Latn-ind_Latn
     source_field: sentence_eng_Latn
     target_field: sentence_ind_Latn
-  validation_size: 5000
+  # Exact retained split sizes after cleaning.  The validation split is used
+  # for early stopping and hyperparameter tuning; FLORES devtest remains the
+  # untouched final evaluation set.
+  train_size: 2000000
+  validation_size: 10000
 
 preprocessing:
   # OpusFilter-style heuristics (Aulamo et al., 2020).
@@ -64,32 +70,49 @@ teacher:
   max_new_tokens: 128
 
 hyperparameter_search:
-  subset_fraction: 0.1
-  trial_epochs: 2
-  trial_validation_size: 2000
-  grids:
+  # Optuna TPE sampler + Hyperband pruner over a resumable per-arch SQLite study
+  # (results/hparam_search/<arch>.db). Objective = validation cross-entropy loss.
+  # Every trial is held identical except the sampled hyperparameters: same seed,
+  # same train slice (top-N highest-LASER-margin rows of train.tsv), same fixed
+  # validation slice (first trial_validation_size rows of valid.tsv), same epochs.
+  n_trials: 30                # Optuna trials per architecture
+  trial_epochs: 3             # max epochs per trial; Hyperband prunes weak trials earlier
+  subset_size: 300000         # top-N rows of train.tsv used to train each trial
+  trial_validation_size: 10000 # first-N rows of valid.tsv used to score each trial
+  sampler: tpe                # tpe | random
+  pruner: hyperband           # hyperband | median | none
+  save_diagram: best_only     # per-trial torchinfo summary always logged; graphviz
+                              # diagram rendered for: best_only | all | none (needs torchview)
+  # Search space per architecture. Types:
+  #   [a, b]            -> categorical choice among the listed values
+  #   {int:  [lo, hi]}  -> integer range (inclusive)
+  #   {loguniform: [lo, hi]} -> float sampled log-uniformly
+  #   {uniform: [lo, hi]}    -> float sampled uniformly
+  search_space:
     gru:
-      embedding_dim: [256, 512]
-      hidden_dim: [512, 1024]
-      num_layers: [2, 4]
-      dropout: [0.2]
-      learning_rate: [0.001, 0.0005]
-      batch_size: [64, 128]
+      embedding_dim: [128, 256, 512]
+      hidden_dim: [256, 512, 768, 1024]
+      num_layers: {int: [1, 4]}
+      dropout: {uniform: [0.1, 0.4]}
+      learning_rate: {loguniform: [1.0e-4, 2.0e-3]}
+      batch_size: [32, 64, 128]
     lstm:
-      embedding_dim: [256, 512]
-      hidden_dim: [512, 1024]
-      num_layers: [2, 4]
-      dropout: [0.2]
-      learning_rate: [0.001, 0.0005]
-      batch_size: [64, 128]
+      embedding_dim: [128, 256, 512]
+      hidden_dim: [256, 512, 768, 1024]
+      num_layers: {int: [1, 4]}
+      dropout: {uniform: [0.1, 0.4]}
+      learning_rate: {loguniform: [1.0e-4, 2.0e-3]}
+      batch_size: [32, 64, 128]
     transformer:
+      # d_model in {256, 512} is divisible by both num_heads {4, 8}, so every
+      # sampled (d_model, num_heads) pair is valid -- no need to reject trials.
       d_model: [256, 512]
       num_heads: [4, 8]
-      num_layers: [3, 6]
-      ffn_dim: [1024, 2048]
-      dropout: [0.1]
-      learning_rate: [0.0005, 0.0003]
-      batch_size: [64, 128]
+      num_layers: {int: [2, 6]}
+      ffn_dim: [1024, 2048, 3072]
+      dropout: {uniform: [0.1, 0.3]}
+      learning_rate: {loguniform: [1.0e-4, 1.0e-3]}
+      batch_size: [32, 64, 128]
 
 training:
   epochs: 20
@@ -99,6 +122,14 @@ training:
   early_stopping_patience: 3
   max_sequence_length: 128
   num_workers: 2
+  # LR schedule: linear warmup then decay, stepped every optimizer step. Applied
+  # in both the hyperparameter search and full training so a config's searched
+  # behaviour transfers to the real runs. Transformers in particular train poorly
+  # without warmup, so this is a fixed default (not a tuned hyperparameter).
+  scheduler:
+    type: cosine            # cosine | inverse_sqrt | none
+    warmup_ratio: 0.06      # fraction of total planned steps spent warming up
+    min_lr_ratio: 0.0       # cosine floor as a fraction of the peak LR
 
 quantization:
   # Asymmetric per-tensor uint8 fake quantization (QAT), applied to nn.Linear layers.

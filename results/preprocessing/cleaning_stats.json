@@ -1,15 +1,13 @@
 {
-  "total": 70545705,
-  "kept": 66832666,
+  "total": 2033487,
+  "kept": 2010000,
   "dropped": {
-    "symbol_mismatch": 3160345,
-    "target_language": 475864,
-    "length_ratio": 3480,
-    "duplicate": 69165,
-    "length": 95,
-    "long_word": 4009,
-    "source_language": 81
+    "symbol_mismatch": 21290,
+    "length_ratio": 55,
+    "duplicate": 2122,
+    "length": 2,
+    "long_word": 18
   },
-  "train_size": 66827666,
-  "valid_size": 5000
+  "train_size": 2000000,
+  "valid_size": 10000
 }

@@ -92,7 +92,7 @@ class QATLinear(nn.Module):
         return F.linear(x, weight, self.linear.bias)
 
 
-def apply_qat(model: nn.Module, momentum: float = 0.99) -> int:
+def  apply_qat(model: nn.Module, momentum: float = 0.99) -> int:
     """Replace every nn.Linear in the model with a QATLinear. Returns the count."""
     # The fused transformer fast path reads weights directly and would skip
     # fake quantization during eval; force the regular (quantized) code path.

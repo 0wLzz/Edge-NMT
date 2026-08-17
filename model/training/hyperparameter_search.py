@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import random
+from pathlib import Path
 
 import numpy as np
 import optuna
@@ -109,18 +110,43 @@ def _seed_worker(worker_id: int) -> None:
     random.seed(worker_seed)
 
 
-def make_subset_loaders(cfg, tokenizer, batch_size: int, device, seed: int):
-    """Top-N train slice + fixed val slice, deterministic across trials."""
+def make_subset_loaders(
+    cfg,
+    tokenizer,
+    batch_size: int,
+    device,
+    seed: int,
+    dataset_dir=None,
+):
+    """Build deterministic trial loaders from an optional prepared dataset.
+
+    ``dataset_dir`` must contain ``train.tsv`` and ``valid.tsv`` in the same
+    two-column, tab-separated format as the project's processed dataset.  When
+    it is omitted, the configured ``data.processed_dir`` is used, preserving
+    the original behaviour.
+    """
     search_cfg = cfg["hyperparameter_search"]
-    processed_dir = resolve_path(cfg["data"]["processed_dir"])
+    processed_dir = (
+        Path(dataset_dir)
+        if dataset_dir is not None
+        else resolve_path(cfg["data"]["processed_dir"])
+    )
+    train_path = processed_dir / "train.tsv"
+    valid_path = processed_dir / "valid.tsv"
+    missing = [str(path) for path in (train_path, valid_path) if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(
+            "Dataset directory must contain train.tsv and valid.tsv; missing: "
+            + ", ".join(missing)
+        )
     max_length = cfg["training"]["max_sequence_length"]
 
     train_dataset = TranslationDataset(
-        processed_dir / "train.tsv", tokenizer, max_length,
+        train_path, tokenizer, max_length,
         limit=search_cfg["subset_size"],
     )
     val_dataset = TranslationDataset(
-        processed_dir / "valid.tsv", tokenizer, max_length,
+        valid_path, tokenizer, max_length,
         limit=search_cfg["trial_validation_size"],
     )
 
@@ -204,7 +230,15 @@ def _render_diagram(model, arch: str, out_stem) -> None:
 # --------------------------------------------------------------------------- #
 # Objective
 # --------------------------------------------------------------------------- #
-def make_objective(cfg, tokenizer, arch: str, device, artifacts_dir, save_diagram: str):
+def make_objective(
+    cfg,
+    tokenizer,
+    arch: str,
+    device,
+    artifacts_dir,
+    save_diagram: str,
+    dataset_dir=None,
+):
     search_cfg = cfg["hyperparameter_search"]
     space = search_cfg["search_space"][arch]
     seed = cfg["seed"]
@@ -214,7 +248,7 @@ def make_objective(cfg, tokenizer, arch: str, device, artifacts_dir, save_diagra
         hparams = sample_hparams(trial, space)
 
         train_loader, val_loader = make_subset_loaders(
-            cfg, tokenizer, hparams["batch_size"], device, seed
+            cfg, tokenizer, hparams["batch_size"], device, seed, dataset_dir
         )
         model = build_model(arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams)
         log_model_info(model, arch, hparams, trial, artifacts_dir, save_diagram)
@@ -294,6 +328,22 @@ def main() -> None:
     parser.add_argument("--arch", required=True, choices=["gru", "lstm", "transformer"])
     parser.add_argument("--config", default=None)
     parser.add_argument(
+        "--dataset-dir",
+        default=None,
+        help=(
+            "Optional directory containing prepared train.tsv and valid.tsv. "
+            "Without this option, uses data.processed_dir from the config."
+        ),
+    )
+    parser.add_argument(
+        "--tokenizer-model",
+        default=None,
+        help=(
+            "Optional path to a SentencePiece .model file. Without this option, "
+            "uses tokenizer.model_prefix from the config."
+        ),
+    )
+    parser.add_argument(
         "--n-trials", type=int, default=None,
         help="Override the total-trial budget from config (useful for smoke tests)",
     )
@@ -301,12 +351,29 @@ def main() -> None:
 
     cfg = load_config(args.config)
     device = pick_device()
-    tokenizer = load_tokenizer(cfg)
+    tokenizer_path = (
+        Path(args.tokenizer_model).expanduser().resolve()
+        if args.tokenizer_model
+        else None
+    )
+    tokenizer = load_tokenizer(cfg, tokenizer_path)
     search_cfg = cfg["hyperparameter_search"]
 
     target_total = args.n_trials if args.n_trials is not None else search_cfg["n_trials"]
     artifacts_dir = RESULTS_DIR / "hparam_search" / args.arch
     save_diagram = search_cfg.get("save_diagram", "best_only")
+    dataset_dir = Path(args.dataset_dir).expanduser().resolve() if args.dataset_dir else None
+    if dataset_dir:
+        print(f"Using supplied dataset directory: {dataset_dir}")
+    else:
+        print(
+            "Using dataset directory from config: "
+            f"{resolve_path(cfg['data']['processed_dir'])}"
+        )
+    if tokenizer_path:
+        print(f"Using supplied tokenizer model: {tokenizer_path}")
+    else:
+        print("Using tokenizer model from config")
 
     study = build_study(args.arch, cfg)
     remaining = max(0, target_total - _finished(study))
@@ -317,7 +384,7 @@ def main() -> None:
 
     if remaining > 0:
         objective = make_objective(
-            cfg, tokenizer, args.arch, device, artifacts_dir, save_diagram
+            cfg, tokenizer, args.arch, device, artifacts_dir, save_diagram, dataset_dir
         )
         study.optimize(objective, n_trials=remaining)
 

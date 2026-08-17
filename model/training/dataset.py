@@ -10,15 +10,26 @@ import sentencepiece as spm
 import torch
 from torch.utils.data import Dataset
 
-from common.config import resolve_path
+from common.config import PROJECT_ROOT, resolve_path
 
 import warnings
 warnings.filterwarnings("ignore")
 
-def load_tokenizer(cfg: dict) -> spm.SentencePieceProcessor:
-    model_path = resolve_path(cfg["tokenizer"]["model_prefix"]).with_suffix(".model")
+PROCESSED_DIR = PROJECT_ROOT / "data/processed"
+
+def load_tokenizer(
+    cfg: dict, model_path: str | Path | None = None
+) -> spm.SentencePieceProcessor:
+    """Load the configured tokenizer, or a model supplied by a caller."""
+    if model_path is None:
+        model_path = resolve_path(cfg["tokenizer"]["model_prefix"]).with_suffix(".model")
+    else:
+        model_path = Path(model_path)
+    if not model_path.is_file():
+        raise FileNotFoundError(f"SentencePiece tokenizer model not found: {model_path}")
     tokenizer = spm.SentencePieceProcessor()
-    tokenizer.Load(str(model_path))
+    if not tokenizer.Load(str(model_path)):
+        raise RuntimeError(f"Could not load SentencePiece tokenizer: {model_path}")
     return tokenizer
  
 

@@ -135,7 +135,7 @@ def main() -> None:
     ap.add_argument("--out-dir", default=None)
     ap.add_argument("--qat", default=False, type=bool, help="Enable quantization-aware training (QAT) for the qat arm")
     ap.add_argument("--ptq", default=False, type=bool, help="Enable post-training quantization (PTQ) for the ptq arm")
-    ap.add_argument("--baseline", defaul=False, type=bool, help="Enable baseline (fp32) for the baseline arm")
+    ap.add_argument("--baseline", default=False, type=bool, help="Enable baseline (fp32) for the baseline arm")
 
     args = ap.parse_args()
 

@@ -118,6 +118,26 @@ def generation_metrics(model, sources, references, tokenizer, cfg, device, meteo
         print(f"[metrics] METEOR unavailable ({exc}); reporting BLEU only")
         return compute_all(hyps, references, chrf=False, meteor=False)
 
+def train_mode(args) -> list[str]:
+    """Return the training mode for the experiment based on the provided arguments."""
+    mode_flags = []
+
+    if args.baseline:
+        mode_flags.append("baseline")
+
+    if args.qat:
+        mode_flags.append("qat")
+    elif args.qat and not args.baseline:
+        raise ValueError("QAT mode requires the baseline to be enabled.")
+
+    if args.ptq:
+        mode_flags.append("ptq")
+
+    if mode_flags == []:
+        raise ValueError("At least one of --baseline, --qat, or --ptq must be specified.")
+
+    return mode_flags
+    
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -133,11 +153,12 @@ def main() -> None:
     ap.add_argument("--calib-batches", type=int, default=50, help="PTQ calibration batches")
     ap.add_argument("--meteor", action="store_true", help="also compute Indonesian-aware METEOR (needs nltk data + Sastrawi)")
     ap.add_argument("--out-dir", default=None)
-    ap.add_argument("--qat", default=False, type=bool, help="Enable quantization-aware training (QAT) for the qat arm")
-    ap.add_argument("--ptq", default=False, type=bool, help="Enable post-training quantization (PTQ) for the ptq arm")
-    ap.add_argument("--baseline", default=False, type=bool, help="Enable baseline (fp32) for the baseline arm")
+    ap.add_argument("--qat", default=False, action="store_true", help="Enable quantization-aware training (QAT) for the qat arm")
+    ap.add_argument("--ptq", default=False, action="store_true", help="Enable post-training quantization (PTQ) for the ptq arm")
+    ap.add_argument("--baseline", default=False, action="store_true", help="Enable baseline (fp32) for the baseline arm")
 
     args = ap.parse_args()
+    training_modes = train_mode(args)
 
     cfg = load_config(args.config)
     seed = cfg["seed"]
@@ -222,12 +243,13 @@ def main() -> None:
 
 
     # ---- summary ------------------------------------------------------------
-    base = results["baseline"]
-    for name in ("qat", "ptq"):
-        r = results[name]
-        r["val_loss_delta_vs_fp32"] = round(r["val_loss"] - base["val_loss"], 4)
-        if do_gen and "bleu" in r and "bleu" in base:
-            r["bleu_delta_vs_fp32"] = round(r["bleu"] - base["bleu"], 2)
+    if args.baseline and args.ptq and args.qat:
+        base = results["baseline"]
+        for name in ("qat", "ptq"):
+            r = results[name]
+            r["val_loss_delta_vs_fp32"] = round(r["val_loss"] - base["val_loss"], 4)
+            if do_gen and "bleu" in r and "bleu" in base:
+                r["bleu_delta_vs_fp32"] = round(r["bleu"] - base["bleu"], 2)
 
     out_dir = Path(args.out_dir).expanduser().resolve() if args.out_dir else RESULTS_DIR / "quant_experiment"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -251,16 +273,18 @@ def main() -> None:
     print("\n================ QAT vs PTQ ({}) ================".format(args.arch))
     header = "variant".ljust(10) + "".join(c.rjust(14) for c in cols)
     print(header); print("-" * len(header))
-    for name in ("baseline", "qat", "ptq"):
+    for name in training_modes:
         r = results[name]
         line = name.ljust(10) + "".join(str(r.get(c, "")).rjust(14) for c in cols)
         print(line)
-    print("\nDeltas vs fp32 (negative BLEU / positive val_loss = worse):")
-    for name in ("qat", "ptq"):
-        r = results[name]
-        print(f"  {name}: val_loss {r['val_loss_delta_vs_fp32']:+.4f}"
-              + (f"   BLEU {r.get('bleu_delta_vs_fp32', float('nan')):+.2f}" if do_gen else ""))
-    print(f"\nSaved: {out_path}")
+
+    if args.baseline and args.ptq and args.qat:
+        print("\nDeltas vs fp32 (negative BLEU / positive val_loss = worse):")
+        for name in ("qat", "ptq"):
+            r = results[name]
+            print(f"  {name}: val_loss {r['val_loss_delta_vs_fp32']:+.4f}"
+                + (f"   BLEU {r.get('bleu_delta_vs_fp32', float('nan')):+.2f}" if do_gen else ""))
+        print(f"\nSaved: {out_path}")
 
 
 if __name__ == "__main__":

@@ -88,12 +88,14 @@ def calibrate_ptq(model, loader, n_batches: int, device) -> None:
     for m in model.modules():
         if isinstance(m, FakeQuantize):
             m.train()  # FakeQuantize.forward observes only while training=True
+
     with torch.no_grad():
         for i, batch in enumerate(loader):
             if i >= n_batches:
                 break
             source, target_input, _ = (t.to(device) for t in batch)
             model(source, target_input)
+
     for m in model.modules():
         if isinstance(m, FakeQuantize):
             m.eval()  # freeze the observed ranges for inference
@@ -131,6 +133,10 @@ def main() -> None:
     ap.add_argument("--calib-batches", type=int, default=50, help="PTQ calibration batches")
     ap.add_argument("--meteor", action="store_true", help="also compute Indonesian-aware METEOR (needs nltk data + Sastrawi)")
     ap.add_argument("--out-dir", default=None)
+    ap.add_argument("--qat", default=False, type=bool, help="Enable quantization-aware training (QAT) for the qat arm")
+    ap.add_argument("--ptq", default=False, type=bool, help="Enable post-training quantization (PTQ) for the ptq arm")
+    ap.add_argument("--baseline", defaul=False, type=bool, help="Enable baseline (fp32) for the baseline arm")
+
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -168,7 +174,7 @@ def main() -> None:
         return Trainer(
             model, train_loader, val_loader,
             pad_id=tokenizer.pad_id(), device=device,
-            learning_rate=hparams["learning_rate"],
+            learning_rate=0.0005,
             weight_decay=cfg["training"]["weight_decay"],
             label_smoothing=cfg["training"]["label_smoothing"],
             grad_clip=cfg["training"]["grad_clip"],
@@ -190,26 +196,30 @@ def main() -> None:
         print(f"[{name}] {row}")
 
     # 1) fp32 baseline (also the source model for PTQ)
-    print("\n===== baseline (fp32) =====")
-    set_seed(seed)
-    baseline = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=False)
-    make_trainer(baseline).train()
-    evaluate_variant("baseline", baseline)
+    if args.baseline:
+        print("\n===== baseline (fp32) =====")
+        set_seed(seed)
+        baseline = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=False)
+        make_trainer(baseline).train()
+        evaluate_variant("baseline", baseline)
 
-    # 2) QAT: fresh model, fake-quant active during training (same seed init)
-    print("\n===== QAT (custom, train-time) =====")
-    set_seed(seed)
-    qat_model = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=True)
-    make_trainer(qat_model).train()
-    evaluate_variant("qat", qat_model)
+        # 3) PTQ: same fake-quant applied to the *trained* baseline + calibration only
+        if args.ptq:
+            print("\n===== PTQ (post-training, calibrated) =====")
+            ptq_model = copy.deepcopy(baseline)
+            apply_qat(ptq_model)          # wrap Linears with fresh observers
+            ptq_model.to(device)          # move the new FakeQuantize buffers onto the device
+            calibrate_ptq(ptq_model, train_loader, args.calib_batches, device)
+            evaluate_variant("ptq", ptq_model)
 
-    # 3) PTQ: same fake-quant applied to the *trained* baseline + calibration only
-    print("\n===== PTQ (post-training, calibrated) =====")
-    ptq_model = copy.deepcopy(baseline)
-    apply_qat(ptq_model)          # wrap Linears with fresh observers
-    ptq_model.to(device)          # move the new FakeQuantize buffers onto the device
-    calibrate_ptq(ptq_model, train_loader, args.calib_batches, device)
-    evaluate_variant("ptq", ptq_model)
+    if args.qat: 
+        # 2) QAT: fresh model, fake-quant active during training (same seed init)
+        print("\n===== QAT (custom, train-time) =====")
+        set_seed(seed)
+        qat_model = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=True)
+        make_trainer(qat_model).train()
+        evaluate_variant("qat", qat_model)
+
 
     # ---- summary ------------------------------------------------------------
     base = results["baseline"]

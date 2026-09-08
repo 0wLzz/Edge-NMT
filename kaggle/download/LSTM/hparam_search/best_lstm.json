@@ -1,0 +1,27 @@
+{
+  "arch": "lstm",
+  "hparams": {
+    "embedding_dim": 256,
+    "hidden_dim": 1024,
+    "num_layers": 3,
+    "dropout": 0.16814170349526358,
+    "learning_rate": 0.001946545250298762,
+    "batch_size": 32
+  },
+  "val_loss": 2.268616012110116,
+  "trial_number": 14,
+  "total_params": 133343488,
+  "param_breakdown": {
+    "embedding": 8192000,
+    "dropout": 0,
+    "encoder": 60866560,
+    "decoder": 22044672,
+    "bridge_hidden": 2098176,
+    "bridge_cell": 2098176,
+    "attention": 2097152,
+    "combine": 3146752,
+    "output_projection": 32800000,
+    "total": 133343488
+  },
+  "n_finished": 30
+}

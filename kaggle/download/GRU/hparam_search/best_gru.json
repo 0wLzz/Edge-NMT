@@ -1,0 +1,26 @@
+{
+  "arch": "gru",
+  "hparams": {
+    "embedding_dim": 512,
+    "hidden_dim": 512,
+    "num_layers": 2,
+    "dropout": 0.2486475607053254,
+    "learning_rate": 0.000557682742461972,
+    "batch_size": 32
+  },
+  "val_loss": 3.197702672915718,
+  "trial_number": 21,
+  "total_params": 45664512,
+  "param_breakdown": {
+    "embedding": 16384000,
+    "dropout": 0,
+    "encoder": 7876608,
+    "decoder": 3151872,
+    "bridge_hidden": 524800,
+    "attention": 524288,
+    "combine": 786944,
+    "output_projection": 16416000,
+    "total": 45664512
+  },
+  "n_finished": 30
+}

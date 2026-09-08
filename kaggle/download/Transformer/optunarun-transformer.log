@@ -1,0 +1,80 @@
+[{"stream_name":"stderr","time":7.497295239,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.497364582,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.497374254,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.497376817,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.101473194,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.101516373,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.101520531,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.101523056,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":14.037622405,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stderr","time":14.240051765,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stderr","time":14.240076054,"data":"\n"}
+,{"stream_name":"stderr","time":14.240082233,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stdout","time":14.885572398,"data":"Current Working Directory: /kaggle/working/Edge-NMT\n"}
+,{"stream_name":"stdout","time":17.895545584,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 527.3/527.3 kB 15.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.921337854,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100.8/100.8 kB 9.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.94520823,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 116.3/116.3 kB 10.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.969037907,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 177.6/177.6 kB 15.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.992747508,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.6/129.6 kB 10.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.097430166,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 527.3/527.3 kB 15.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.097450245,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100.8/100.8 kB 9.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.097456925,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 116.3/116.3 kB 10.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.097461967,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 177.6/177.6 kB 15.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":18.097466646,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.6/129.6 kB 10.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":21.347015494,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.347077772,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.347083216,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.347085899,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.699352923,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.699412036,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.699419048,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.699424195,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.699428535,"data":"\n"}
+,{"stream_name":"stderr","time":21.699432575,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.699437444,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.699442139,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.69944638,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stdout","time":21.737969416,"data":"GPU: Tesla T4 sm_75\n"}
+,{"stream_name":"stdout","time":21.748361369,"data":"RUN model.training.hyperparameter_search --arch transformer --config configs/config.yaml --dataset-dir /kaggle/input/datasets/owlimm/skripsi-edgenmten-id --tokenizer-model /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model --n-trials 30\n"}
+,{"stream_name":"stderr","time":25.716709045,"data":"[I 2026-08-29 00:09:31,365] Using an existing study with name 'transformer' instead of creating a new one.\n"}
+,{"stream_name":"stderr","time":25.918936073,"data":"[I 2026-08-29 00:09:31,365] Using an existing study with name 'transformer' instead of creating a new one.\n"}
+,{"stream_name":"stderr","time":25.918967811999998,"data":"\n"}
+,{"stream_name":"stderr","time":25.918973145,"data":"[I 2026-08-29 00:09:31,365] Using an existing study with name 'transformer' instead of creating a new one.\n"}
+,{"stream_name":"stdout","time":33.021186282,"data":"Using supplied dataset directory: /kaggle/input/datasets/owlimm/skripsi-edgenmten-id\n"}
+,{"stream_name":"stdout","time":33.021215611,"data":"Using supplied tokenizer model: /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model\n"}
+,{"stream_name":"stdout","time":33.021221175,"data":"Optuna search for transformer on cuda: 26/30 trials done, running 4 more\n"}
+,{"stream_name":"stdout","time":33.223382816,"data":"Using supplied dataset directory: /kaggle/input/datasets/owlimm/skripsi-edgenmten-id\n"}
+,{"stream_name":"stdout","time":33.223416671,"data":"Using supplied tokenizer model: /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model\n"}
+,{"stream_name":"stdout","time":33.22342826,"data":"Optuna search for transformer on cuda: 26/30 trials done, running 4 more\n"}
+,{"stream_name":"stderr","time":2317.2208306,"data":"[I 2026-08-29 00:47:42,869] Trial 27 finished with value: 3.544660229591807 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.13603430533288993, 'learning_rate': 0.00036469763889425, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":2317.427320845,"data":"[I 2026-08-29 00:47:42,869] Trial 27 finished with value: 3.544660229591807 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.13603430533288993, 'learning_rate': 0.00036469763889425, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":2317.427356157,"data":"\n"}
+,{"stream_name":"stderr","time":2317.427362616,"data":"[I 2026-08-29 00:47:42,869] Trial 27 finished with value: 3.544660229591807 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.13603430533288993, 'learning_rate': 0.00036469763889425, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":5553.327914849,"data":"[I 2026-08-29 01:41:38,976] Trial 28 finished with value: 3.6480062493852747 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 5, 'ffn_dim': 3072, 'dropout': 0.14013993703678912, 'learning_rate': 0.00036363616500576456, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":5553.532046104,"data":"[I 2026-08-29 01:41:38,976] Trial 28 finished with value: 3.6480062493852747 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 5, 'ffn_dim': 3072, 'dropout': 0.14013993703678912, 'learning_rate': 0.00036363616500576456, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":5553.532069817,"data":"\n"}
+,{"stream_name":"stderr","time":5553.532074876,"data":"[I 2026-08-29 01:41:38,976] Trial 28 finished with value: 3.6480062493852747 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 5, 'ffn_dim': 3072, 'dropout': 0.14013993703678912, 'learning_rate': 0.00036363616500576456, 'batch_size': 64}. Best is trial 24 with value: 3.517680432386459.\n"}
+,{"stream_name":"stderr","time":8317.493645899,"data":"[I 2026-08-29 02:27:43,142] Trial 29 pruned. \n"}
+,{"stream_name":"stderr","time":8317.698497837,"data":"[I 2026-08-29 02:27:43,142] Trial 29 pruned. \n"}
+,{"stream_name":"stderr","time":8317.698527276,"data":"\n"}
+,{"stream_name":"stderr","time":8317.698532869,"data":"[I 2026-08-29 02:27:43,142] Trial 29 pruned. \n"}
+,{"stream_name":"stderr","time":10602.855487643,"data":"[I 2026-08-29 03:05:48,504] Trial 30 finished with value: 3.3482189634043698 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.11612508630724408, 'learning_rate': 0.0005284334131312429, 'batch_size': 64}. Best is trial 30 with value: 3.3482189634043698.\n"}
+,{"stream_name":"stderr","time":10603.060857421,"data":"[I 2026-08-29 03:05:48,504] Trial 30 finished with value: 3.3482189634043698 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.11612508630724408, 'learning_rate': 0.0005284334131312429, 'batch_size': 64}. Best is trial 30 with value: 3.3482189634043698.\n"}
+,{"stream_name":"stderr","time":10603.06088661,"data":"\n"}
+,{"stream_name":"stderr","time":10603.060891705,"data":"[I 2026-08-29 03:05:48,504] Trial 30 finished with value: 3.3482189634043698 and parameters: {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.11612508630724408, 'learning_rate': 0.0005284334131312429, 'batch_size': 64}. Best is trial 30 with value: 3.3482189634043698.\n"}
+,{"stream_name":"stdout","time":10603.429338536,"data":"[diagram] skipped (No module named 'torchview'); pip install torchview + graphviz to enable\n"}
+,{"stream_name":"stdout","time":10603.429377878,"data":"Best transformer: val_loss=3.3482 {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.11612508630724408, 'learning_rate': 0.0005284334131312429, 'batch_size': 64}\n"}
+,{"stream_name":"stdout","time":10603.429383516,"data":"Saved to /kaggle/working/Edge-NMT/results/hparam_search/best_transformer.json\n"}
+,{"stream_name":"stdout","time":10603.631608378,"data":"[diagram] skipped (No module named 'torchview'); pip install torchview + graphviz to enable\n"}
+,{"stream_name":"stdout","time":10603.631641279,"data":"Best transformer: val_loss=3.3482 {'d_model': 512, 'num_heads': 8, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.11612508630724408, 'learning_rate': 0.0005284334131312429, 'batch_size': 64}\n"}
+,{"stream_name":"stdout","time":10603.631647634,"data":"Saved to /kaggle/working/Edge-NMT/results/hparam_search/best_transformer.json\n"}
+,{"stream_name":"stdout","time":10606.226251844,"data":"no best_gru.json — see search output above\n"}
+,{"stream_name":"stderr","time":10609.113795258,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":10609.113824149,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":10609.278829999,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":10609.278852574,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":10609.894746597,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":10610.183680852,"data":"[NbConvertApp] Writing 9712 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":10612.42608209,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":10613.13928798,"data":"[NbConvertApp] Writing 288607 bytes to __results__.html\n"}
+]

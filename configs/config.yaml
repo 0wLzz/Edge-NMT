@@ -10,7 +10,7 @@ data:
     hf_config: en-id
     # CCMatrix is ordered by LASER margin score; taking the first N pairs
     # doubles as quality filtering. Adjust to your compute budget.
-    # Raw pairs downloaded for preprocessing. 2.3M provides headroom for
+    # Raw pairs downloaded for preprocessing. 2.01M provides headroom for
     # cleaning losses while retaining exactly 2M training  10k testing pairs.
     max_pairs: 2010000
   flores:
@@ -21,8 +21,8 @@ data:
   # Exact retained split sizes after cleaning.  The validation split is used
   # for early stopping and hyperparameter tuning; FLORES devtest remains the
   # untouched final evaluation set.
-  train_size: 2000000
-  validation_size: 10000
+  train_size: 2_000_000
+  validation_size: 10_000
 
 preprocessing:
   # OpusFilter-style heuristics (Aulamo et al., 2020).
@@ -77,8 +77,8 @@ hyperparameter_search:
   # validation slice (first trial_validation_size rows of valid.tsv), same epochs.
   n_trials: 30                # Optuna trials per architecture
   trial_epochs: 3             # max epochs per trial; Hyperband prunes weak trials earlier
-  subset_size: 300000         # top-N rows of train.tsv used to train each trial
-  trial_validation_size: 10000 # first-N rows of valid.tsv used to score each trial
+  subset_size: 200_000         # top-N rows of train.tsv used to train each trial
+  trial_validation_size: 10_000 # first-N rows of valid.tsv used to score each trial
   sampler: tpe                # tpe | random
   pruner: hyperband           # hyperband | median | none
   save_diagram: best_only     # per-trial torchinfo summary always logged; graphviz

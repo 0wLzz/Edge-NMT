@@ -1,0 +1,187 @@
+[{"stream_name":"stderr","time":7.206424389,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.206510616,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.206518951,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.206523578,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":7.894108499,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.894159687,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.894164384,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.894167381,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":13.836453262,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stderr","time":14.039261332,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stderr","time":14.03930686,"data":"\n"}
+,{"stream_name":"stderr","time":14.039313503,"data":"Cloning into 'Edge-NMT'...\n"}
+,{"stream_name":"stdout","time":14.601309561,"data":"Current Working Directory: /kaggle/working/Edge-NMT\n"}
+,{"stream_name":"stdout","time":17.595985752,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 527.3/527.3 kB 12.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.624541713,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100.8/100.8 kB 7.7 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.654743866,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 116.3/116.3 kB 8.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.688721896,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 177.6/177.6 kB 14.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.71701832,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 65.9/65.9 kB 4.7 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.798396604,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 527.3/527.3 kB 12.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.798418714,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100.8/100.8 kB 7.7 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.798425241,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 116.3/116.3 kB 8.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.798430573,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 177.6/177.6 kB 14.8 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.798435637,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 65.9/65.9 kB 4.7 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":21.22948989,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.229531188,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.229536863,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.229540676,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.590559798,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.590631305,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.590640635,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.590645553,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.59064902,"data":"\n"}
+,{"stream_name":"stderr","time":21.590652142,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stderr","time":21.59065629,"data":"bigframes 2.39.0 requires google-cloud-bigquery-storage\u003c3.0.0,\u003e=2.30.0, which is not installed.\n"}
+,{"stream_name":"stderr","time":21.590659834,"data":"tpot 1.1.0 requires dill\u003e=0.3.9, but you have dill 0.3.8 which is incompatible.\n"}
+,{"stream_name":"stderr","time":21.590663133,"data":"gcsfs 2025.3.0 requires fsspec==2025.3.0, but you have fsspec 2024.6.1 which is incompatible.\n"}
+,{"stream_name":"stdout","time":21.62820068,"data":"GPU: Tesla T4 sm_75\n"}
+,{"stream_name":"stdout","time":21.639508487,"data":"RUN model.training.hyperparameter_search --arch gru --config configs/config.yaml --n-trials 30 --dataset-dir /kaggle/input/skripsi-edgenmten-id --tokenizer-model /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model\n"}
+,{"stream_name":"stderr","time":25.834747561,"data":"[I 2026-08-17 15:23:55,630] A new study created in RDB with name: gru\n"}
+,{"stream_name":"stderr","time":26.036942184,"data":"[I 2026-08-17 15:23:55,630] A new study created in RDB with name: gru\n"}
+,{"stream_name":"stderr","time":26.036980506,"data":"\n"}
+,{"stream_name":"stderr","time":26.036985399,"data":"[I 2026-08-17 15:23:55,630] A new study created in RDB with name: gru\n"}
+,{"stream_name":"stdout","time":32.407954083,"data":"Using supplied dataset directory: /kaggle/input/skripsi-edgenmten-id\n"}
+,{"stream_name":"stdout","time":32.407997159,"data":"Using supplied tokenizer model: /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model\n"}
+,{"stream_name":"stdout","time":32.408005182,"data":"Optuna search for gru on cuda: 0/30 trials done, running 30 more\n"}
+,{"stream_name":"stdout","time":32.610934437,"data":"Using supplied dataset directory: /kaggle/input/skripsi-edgenmten-id\n"}
+,{"stream_name":"stdout","time":32.61097355,"data":"Using supplied tokenizer model: /kaggle/input/models/owlimm/skripsi-edgenmt-tokenizer/pytorch/default/3/spm_en_id.model\n"}
+,{"stream_name":"stdout","time":32.610978174,"data":"Optuna search for gru on cuda: 0/30 trials done, running 30 more\n"}
+,{"stream_name":"stderr","time":906.773423772,"data":"[I 2026-08-17 15:38:36,568] Trial 0 finished with value: 4.103133194006173 and parameters: {'embedding_dim': 256, 'hidden_dim': 256, 'num_layers': 4, 'dropout': 0.2803345035229627, 'learning_rate': 0.0008341106432362095, 'batch_size': 64}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":906.978811766,"data":"[I 2026-08-17 15:38:36,568] Trial 0 finished with value: 4.103133194006173 and parameters: {'embedding_dim': 256, 'hidden_dim': 256, 'num_layers': 4, 'dropout': 0.2803345035229627, 'learning_rate': 0.0008341106432362095, 'batch_size': 64}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":906.978842467,"data":"\n"}
+,{"stream_name":"stderr","time":906.978847288,"data":"[I 2026-08-17 15:38:36,568] Trial 0 finished with value: 4.103133194006173 and parameters: {'embedding_dim': 256, 'hidden_dim': 256, 'num_layers': 4, 'dropout': 0.2803345035229627, 'learning_rate': 0.0008341106432362095, 'batch_size': 64}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":1522.597119134,"data":"[I 2026-08-17 15:48:52,392] Trial 1 pruned. \n"}
+,{"stream_name":"stderr","time":1522.802641017,"data":"[I 2026-08-17 15:48:52,392] Trial 1 pruned. \n"}
+,{"stream_name":"stderr","time":1522.802673777,"data":"\n"}
+,{"stream_name":"stderr","time":1522.802678719,"data":"[I 2026-08-17 15:48:52,392] Trial 1 pruned. \n"}
+,{"stream_name":"stderr","time":3822.098943626,"data":"[I 2026-08-17 16:27:11,894] Trial 2 finished with value: 4.714967812163921 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 4, 'dropout': 0.3896896099223679, 'learning_rate': 0.0011265466963346032, 'batch_size': 128}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":3822.304850371,"data":"[I 2026-08-17 16:27:11,894] Trial 2 finished with value: 4.714967812163921 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 4, 'dropout': 0.3896896099223679, 'learning_rate': 0.0011265466963346032, 'batch_size': 128}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":3822.304877004,"data":"\n"}
+,{"stream_name":"stderr","time":3822.304882317,"data":"[I 2026-08-17 16:27:11,894] Trial 2 finished with value: 4.714967812163921 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 4, 'dropout': 0.3896896099223679, 'learning_rate': 0.0011265466963346032, 'batch_size': 128}. Best is trial 0 with value: 4.103133194006173.\n"}
+,{"stream_name":"stderr","time":5337.713574315,"data":"[I 2026-08-17 16:52:27,508] Trial 3 finished with value: 3.346847342837388 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2560204063533433, 'learning_rate': 0.0005143828405076933, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":5337.918609578,"data":"[I 2026-08-17 16:52:27,508] Trial 3 finished with value: 3.346847342837388 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2560204063533433, 'learning_rate': 0.0005143828405076933, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":5337.918641104,"data":"\n"}
+,{"stream_name":"stderr","time":5337.918646155,"data":"[I 2026-08-17 16:52:27,508] Trial 3 finished with value: 3.346847342837388 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2560204063533433, 'learning_rate': 0.0005143828405076933, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":5569.634557341,"data":"[I 2026-08-17 16:56:19,429] Trial 4 pruned. \n"}
+,{"stream_name":"stderr","time":5569.839780913,"data":"[I 2026-08-17 16:56:19,429] Trial 4 pruned. \n"}
+,{"stream_name":"stderr","time":5569.839810262,"data":"\n"}
+,{"stream_name":"stderr","time":5569.839815688,"data":"[I 2026-08-17 16:56:19,429] Trial 4 pruned. \n"}
+,{"stream_name":"stderr","time":6737.028945462,"data":"[I 2026-08-17 17:15:46,824] Trial 5 finished with value: 3.4060671739517505 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.3446384285364503, 'learning_rate': 0.0008310795711416077, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":6737.234561284,"data":"[I 2026-08-17 17:15:46,824] Trial 5 finished with value: 3.4060671739517505 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.3446384285364503, 'learning_rate': 0.0008310795711416077, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":6737.234617615,"data":"\n"}
+,{"stream_name":"stderr","time":6737.234626383,"data":"[I 2026-08-17 17:15:46,824] Trial 5 finished with value: 3.4060671739517505 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.3446384285364503, 'learning_rate': 0.0008310795711416077, 'batch_size': 64}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":7569.070923806,"data":"[I 2026-08-17 17:29:38,866] Trial 6 pruned. \n"}
+,{"stream_name":"stderr","time":7569.276249524,"data":"[I 2026-08-17 17:29:38,866] Trial 6 pruned. \n"}
+,{"stream_name":"stderr","time":7569.276280233,"data":"\n"}
+,{"stream_name":"stderr","time":7569.276285186,"data":"[I 2026-08-17 17:29:38,866] Trial 6 pruned. \n"}
+,{"stream_name":"stderr","time":7780.722063369,"data":"[I 2026-08-17 17:33:10,517] Trial 7 pruned. \n"}
+,{"stream_name":"stderr","time":7780.926101322,"data":"[I 2026-08-17 17:33:10,517] Trial 7 pruned. \n"}
+,{"stream_name":"stderr","time":7780.926125718,"data":"\n"}
+,{"stream_name":"stderr","time":7780.926131237,"data":"[I 2026-08-17 17:33:10,517] Trial 7 pruned. \n"}
+,{"stream_name":"stderr","time":7965.842464784,"data":"[I 2026-08-17 17:36:15,637] Trial 8 pruned. \n"}
+,{"stream_name":"stderr","time":7966.047975231,"data":"[I 2026-08-17 17:36:15,637] Trial 8 pruned. \n"}
+,{"stream_name":"stderr","time":7966.048000986,"data":"\n"}
+,{"stream_name":"stderr","time":7966.048006643,"data":"[I 2026-08-17 17:36:15,637] Trial 8 pruned. \n"}
+,{"stream_name":"stderr","time":9121.516920159,"data":"[I 2026-08-17 17:55:31,312] Trial 9 finished with value: 3.3504615911660482 and parameters: {'embedding_dim': 256, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.2281323365878769, 'learning_rate': 0.001159475956637248, 'batch_size': 32}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":9121.722290597,"data":"[I 2026-08-17 17:55:31,312] Trial 9 finished with value: 3.3504615911660482 and parameters: {'embedding_dim': 256, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.2281323365878769, 'learning_rate': 0.001159475956637248, 'batch_size': 32}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":9121.722318414,"data":"\n"}
+,{"stream_name":"stderr","time":9121.722323391,"data":"[I 2026-08-17 17:55:31,312] Trial 9 finished with value: 3.3504615911660482 and parameters: {'embedding_dim': 256, 'hidden_dim': 512, 'num_layers': 1, 'dropout': 0.2281323365878769, 'learning_rate': 0.001159475956637248, 'batch_size': 32}. Best is trial 3 with value: 3.346847342837388.\n"}
+,{"stream_name":"stderr","time":10265.532212717,"data":"[I 2026-08-17 18:14:35,327] Trial 10 pruned. \n"}
+,{"stream_name":"stderr","time":10265.73709062,"data":"[I 2026-08-17 18:14:35,327] Trial 10 pruned. \n"}
+,{"stream_name":"stderr","time":10265.737118379,"data":"\n"}
+,{"stream_name":"stderr","time":10265.737136762,"data":"[I 2026-08-17 18:14:35,327] Trial 10 pruned. \n"}
+,{"stream_name":"stderr","time":11532.380155569,"data":"[I 2026-08-17 18:35:42,175] Trial 11 pruned. \n"}
+,{"stream_name":"stderr","time":11532.58605225,"data":"[I 2026-08-17 18:35:42,175] Trial 11 pruned. \n"}
+,{"stream_name":"stderr","time":11532.58608379,"data":"\n"}
+,{"stream_name":"stderr","time":11532.586086982,"data":"[I 2026-08-17 18:35:42,175] Trial 11 pruned. \n"}
+,{"stream_name":"stderr","time":12970.756882275,"data":"[I 2026-08-17 18:59:40,552] Trial 12 pruned. \n"}
+,{"stream_name":"stderr","time":12970.96177187,"data":"[I 2026-08-17 18:59:40,552] Trial 12 pruned. \n"}
+,{"stream_name":"stderr","time":12970.961797204,"data":"\n"}
+,{"stream_name":"stderr","time":12970.961803658,"data":"[I 2026-08-17 18:59:40,552] Trial 12 pruned. \n"}
+,{"stream_name":"stderr","time":14126.759542275,"data":"[I 2026-08-17 19:18:56,554] Trial 13 pruned. \n"}
+,{"stream_name":"stderr","time":14126.96721813,"data":"[I 2026-08-17 19:18:56,554] Trial 13 pruned. \n"}
+,{"stream_name":"stderr","time":14126.967264084,"data":"\n"}
+,{"stream_name":"stderr","time":14126.967268109,"data":"[I 2026-08-17 19:18:56,554] Trial 13 pruned. \n"}
+,{"stream_name":"stderr","time":15862.532988112,"data":"[I 2026-08-17 19:47:52,328] Trial 14 pruned. \n"}
+,{"stream_name":"stderr","time":15862.738728595,"data":"[I 2026-08-17 19:47:52,328] Trial 14 pruned. \n"}
+,{"stream_name":"stderr","time":15862.738758822,"data":"\n"}
+,{"stream_name":"stderr","time":15862.73876361,"data":"[I 2026-08-17 19:47:52,328] Trial 14 pruned. \n"}
+,{"stream_name":"stderr","time":18456.005697532,"data":"[I 2026-08-17 20:31:05,800] Trial 15 pruned. \n"}
+,{"stream_name":"stderr","time":18456.211204381,"data":"[I 2026-08-17 20:31:05,800] Trial 15 pruned. \n"}
+,{"stream_name":"stderr","time":18456.211233447,"data":"\n"}
+,{"stream_name":"stderr","time":18456.211239759,"data":"[I 2026-08-17 20:31:05,800] Trial 15 pruned. \n"}
+,{"stream_name":"stderr","time":19611.891895851,"data":"[I 2026-08-17 20:50:21,687] Trial 16 pruned. \n"}
+,{"stream_name":"stderr","time":19612.096358957,"data":"[I 2026-08-17 20:50:21,687] Trial 16 pruned. \n"}
+,{"stream_name":"stderr","time":19612.096386301,"data":"\n"}
+,{"stream_name":"stderr","time":19612.096391385,"data":"[I 2026-08-17 20:50:21,687] Trial 16 pruned. \n"}
+,{"stream_name":"stderr","time":21260.1351757,"data":"[I 2026-08-17 21:17:49,930] Trial 17 finished with value: 3.2935101330851593 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3007341255749541, 'learning_rate': 0.000605349964202688, 'batch_size': 32}. Best is trial 17 with value: 3.2935101330851593.\n"}
+,{"stream_name":"stderr","time":21260.340821028,"data":"[I 2026-08-17 21:17:49,930] Trial 17 finished with value: 3.2935101330851593 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3007341255749541, 'learning_rate': 0.000605349964202688, 'batch_size': 32}. Best is trial 17 with value: 3.2935101330851593.\n"}
+,{"stream_name":"stderr","time":21260.3408513,"data":"\n"}
+,{"stream_name":"stderr","time":21260.340869637,"data":"[I 2026-08-17 21:17:49,930] Trial 17 finished with value: 3.2935101330851593 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3007341255749541, 'learning_rate': 0.000605349964202688, 'batch_size': 32}. Best is trial 17 with value: 3.2935101330851593.\n"}
+,{"stream_name":"stderr","time":21887.642160589,"data":"[I 2026-08-17 21:28:17,437] Trial 18 pruned. \n"}
+,{"stream_name":"stderr","time":21887.846685998,"data":"[I 2026-08-17 21:28:17,437] Trial 18 pruned. \n"}
+,{"stream_name":"stderr","time":21887.846715209,"data":"\n"}
+,{"stream_name":"stderr","time":21887.846720754,"data":"[I 2026-08-17 21:28:17,437] Trial 18 pruned. \n"}
+,{"stream_name":"stderr","time":22725.813233106,"data":"[I 2026-08-17 21:42:15,608] Trial 19 pruned. \n"}
+,{"stream_name":"stderr","time":22726.018112413,"data":"[I 2026-08-17 21:42:15,608] Trial 19 pruned. \n"}
+,{"stream_name":"stderr","time":22726.018153189,"data":"\n"}
+,{"stream_name":"stderr","time":22726.018158852,"data":"[I 2026-08-17 21:42:15,608] Trial 19 pruned. \n"}
+,{"stream_name":"stderr","time":24414.308910038,"data":"[I 2026-08-17 22:10:24,104] Trial 20 pruned. \n"}
+,{"stream_name":"stderr","time":24414.51418506,"data":"[I 2026-08-17 22:10:24,104] Trial 20 pruned. \n"}
+,{"stream_name":"stderr","time":24414.514212586,"data":"\n"}
+,{"stream_name":"stderr","time":24414.514228917,"data":"[I 2026-08-17 22:10:24,104] Trial 20 pruned. \n"}
+,{"stream_name":"stderr","time":26064.572400632,"data":"[I 2026-08-17 22:37:54,367] Trial 21 finished with value: 3.197702672915718 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":26064.777663336,"data":"[I 2026-08-17 22:37:54,367] Trial 21 finished with value: 3.197702672915718 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":26064.777695397,"data":"\n"}
+,{"stream_name":"stderr","time":26064.777701598,"data":"[I 2026-08-17 22:37:54,367] Trial 21 finished with value: 3.197702672915718 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":27713.770440335,"data":"[I 2026-08-17 23:05:23,565] Trial 22 finished with value: 3.2419197490801825 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2653106913656201, 'learning_rate': 0.0006080080564430522, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":27713.97625068,"data":"[I 2026-08-17 23:05:23,565] Trial 22 finished with value: 3.2419197490801825 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2653106913656201, 'learning_rate': 0.0006080080564430522, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":27713.976291505,"data":"\n"}
+,{"stream_name":"stderr","time":27713.976297509,"data":"[I 2026-08-17 23:05:23,565] Trial 22 finished with value: 3.2419197490801825 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2653106913656201, 'learning_rate': 0.0006080080564430522, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":29364.551136489,"data":"[I 2026-08-17 23:32:54,346] Trial 23 finished with value: 3.3028414173248097 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3003067064233492, 'learning_rate': 0.0006407610143618005, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":29364.757760719,"data":"[I 2026-08-17 23:32:54,346] Trial 23 finished with value: 3.3028414173248097 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3003067064233492, 'learning_rate': 0.0006407610143618005, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":29364.757788715,"data":"\n"}
+,{"stream_name":"stderr","time":29364.757800293,"data":"[I 2026-08-17 23:32:54,346] Trial 23 finished with value: 3.3028414173248097 and parameters: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.3003067064233492, 'learning_rate': 0.0006407610143618005, 'batch_size': 32}. Best is trial 21 with value: 3.197702672915718.\n"}
+,{"stream_name":"stderr","time":31012.016377013,"data":"[I 2026-08-18 00:00:21,811] Trial 24 pruned. \n"}
+,{"stream_name":"stderr","time":31012.224974088,"data":"[I 2026-08-18 00:00:21,811] Trial 24 pruned. \n"}
+,{"stream_name":"stderr","time":31012.225017614,"data":"\n"}
+,{"stream_name":"stderr","time":31012.225023008,"data":"[I 2026-08-18 00:00:21,811] Trial 24 pruned. \n"}
+,{"stream_name":"stderr","time":31696.594825172,"data":"[I 2026-08-18 00:11:46,389] Trial 25 pruned. \n"}
+,{"stream_name":"stderr","time":31696.80224534,"data":"[I 2026-08-18 00:11:46,389] Trial 25 pruned. \n"}
+,{"stream_name":"stderr","time":31696.802282928,"data":"\n"}
+,{"stream_name":"stderr","time":31696.802300543,"data":"[I 2026-08-18 00:11:46,389] Trial 25 pruned. \n"}
+,{"stream_name":"stderr","time":33184.302758643,"data":"[I 2026-08-18 00:36:34,097] Trial 26 pruned. \n"}
+,{"stream_name":"stderr","time":33184.507572879,"data":"[I 2026-08-18 00:36:34,097] Trial 26 pruned. \n"}
+,{"stream_name":"stderr","time":33184.507617419,"data":"\n"}
+,{"stream_name":"stderr","time":33184.507623459,"data":"[I 2026-08-18 00:36:34,097] Trial 26 pruned. \n"}
+,{"stream_name":"stderr","time":34836.906015852,"data":"[I 2026-08-18 01:04:06,701] Trial 27 pruned. \n"}
+,{"stream_name":"stderr","time":34837.11202343,"data":"[I 2026-08-18 01:04:06,701] Trial 27 pruned. \n"}
+,{"stream_name":"stderr","time":34837.11208552,"data":"\n"}
+,{"stream_name":"stderr","time":34837.112093322,"data":"[I 2026-08-18 01:04:06,701] Trial 27 pruned. \n"}
+,{"stream_name":"stderr","time":36621.403344446,"data":"[I 2026-08-18 01:33:51,198] Trial 28 pruned. \n"}
+,{"stream_name":"stderr","time":36621.608107259,"data":"[I 2026-08-18 01:33:51,198] Trial 28 pruned. \n"}
+,{"stream_name":"stderr","time":36621.608145111,"data":"\n"}
+,{"stream_name":"stderr","time":36621.608151444,"data":"[I 2026-08-18 01:33:51,198] Trial 28 pruned. \n"}
+,{"stream_name":"stderr","time":41083.822273374,"data":"[I 2026-08-18 02:48:13,617] Trial 29 pruned. \n"}
+,{"stream_name":"stderr","time":41084.031763839,"data":"[I 2026-08-18 02:48:13,617] Trial 29 pruned. \n"}
+,{"stream_name":"stderr","time":41084.031807599,"data":"\n"}
+,{"stream_name":"stderr","time":41084.031816112,"data":"[I 2026-08-18 02:48:13,617] Trial 29 pruned. \n"}
+,{"stream_name":"stdout","time":41084.28944059,"data":"[diagram] skipped (No module named 'torchview'); pip install torchview + graphviz to enable\n"}
+,{"stream_name":"stdout","time":41084.289474801,"data":"Best gru: val_loss=3.1977 {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}\n"}
+,{"stream_name":"stdout","time":41084.289481944,"data":"Saved to /kaggle/working/Edge-NMT/results/hparam_search/best_gru.json\n"}
+,{"stream_name":"stdout","time":41084.492269798,"data":"[diagram] skipped (No module named 'torchview'); pip install torchview + graphviz to enable\n"}
+,{"stream_name":"stdout","time":41084.492339336,"data":"Best gru: val_loss=3.1977 {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}\n"}
+,{"stream_name":"stdout","time":41084.492348824,"data":"Saved to /kaggle/working/Edge-NMT/results/hparam_search/best_gru.json\n"}
+,{"stream_name":"stdout","time":41087.071333016,"data":"BEST GRU val_loss=3.1977\n"}
+,{"stream_name":"stdout","time":41087.071369028,"data":"hparams: {'embedding_dim': 512, 'hidden_dim': 512, 'num_layers': 2, 'dropout': 0.2486475607053254, 'learning_rate': 0.000557682742461972, 'batch_size': 32}\n"}
+,{"stream_name":"stdout","time":41087.071377519,"data":"total_params: 45664512\n"}
+,{"stream_name":"stdout","time":41087.071383165,"data":"breakdown: {'embedding': 16384000, 'dropout': 0, 'encoder': 7876608, 'decoder': 3151872, 'bridge_hidden': 524800, 'attention': 524288, 'combine': 786944, 'output_projection': 16416000, 'total': 45664512}\n"}
+,{"stream_name":"stderr","time":41090.245429735,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":41090.245475401,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":41090.418058285,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":41090.418110909,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":41091.103895156,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":41091.460441654,"data":"[NbConvertApp] Writing 12878 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":41094.002845941,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":41094.810904733,"data":"[NbConvertApp] Writing 291830 bytes to __results__.html\n"}
+]

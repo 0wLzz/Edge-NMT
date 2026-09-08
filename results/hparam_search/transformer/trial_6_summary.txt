@@ -1,0 +1,6 @@
+arch=transformer
+hparams={'d_model': 256, 'num_heads': 4, 'num_layers': 3, 'ffn_dim': 3072, 'dropout': 0.24592123566761281, 'learning_rate': 0.00043406770118894003, 'batch_size': 32}
+
+[torchinfo summary unavailable: Failed to run torchinfo. See above stack traces for more details. Executed layers up to: [Embedding: 1, PositionalEncoding: 1, Dropout: 1]]
+
+param_breakdown={'embedding': 8192000, 'positional_encoding': 0, 'dropout': 0, 'transformer': 11834368, 'output_projection': 8224000, 'total': 28250368}

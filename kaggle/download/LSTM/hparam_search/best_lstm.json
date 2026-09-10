@@ -1,27 +1,27 @@
 {
   "arch": "lstm",
   "hparams": {
-    "embedding_dim": 256,
-    "hidden_dim": 1024,
+    "embedding_dim": 512,
+    "hidden_dim": 512,
     "num_layers": 3,
-    "dropout": 0.16814170349526358,
-    "learning_rate": 0.001946545250298762,
+    "dropout": 0.16549041945635506,
+    "learning_rate": 0.0005,
     "batch_size": 32
   },
-  "val_loss": 2.268616012110116,
-  "trial_number": 14,
-  "total_params": 133343488,
+  "val_loss": 2.650323205862563,
+  "trial_number": 26,
+  "total_params": 58266368,
   "param_breakdown": {
-    "embedding": 8192000,
+    "embedding": 16384000,
     "dropout": 0,
-    "encoder": 60866560,
-    "decoder": 22044672,
-    "bridge_hidden": 2098176,
-    "bridge_cell": 2098176,
-    "attention": 2097152,
-    "combine": 3146752,
-    "output_projection": 32800000,
-    "total": 133343488
+    "encoder": 16801792,
+    "decoder": 6303744,
+    "bridge_hidden": 524800,
+    "bridge_cell": 524800,
+    "attention": 524288,
+    "combine": 786944,
+    "output_projection": 16416000,
+    "total": 58266368
   },
   "n_finished": 30
 }

@@ -1,0 +1,9 @@
+{
+  "model": "facebook/mbart-large-50-many-to-many-mmt",
+  "eval_set": "ccmatrix_valid",
+  "samples": 1000,
+  "num_beams": 5,
+  "timestamp": "2026-09-12T12:45:52",
+  "bleu": 49.11,
+  "bleu_signature": "BLEU = 49.11 75.4/56.1/42.9/33.0 (BP = 0.993 ratio = 0.993 hyp_len = 14838 ref_len = 14946)"
+}

@@ -27,6 +27,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from torch.utils.data import DataLoader
 
@@ -76,8 +77,8 @@ def load_best_hparams(arch: str, cfg: dict, override_path: str | None) -> dict:
     return default_hparams(space)
 
 
-def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device):
-    processed_dir = resolve_path(cfg["data"]["processed_dir"])
+def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device, dataset_dir=None):
+    processed_dir = Path(dataset_dir) if dataset_dir else resolve_path(cfg["data"]["processed_dir"])
     train_file = "kd_train.tsv" if data_mode == "kd" else "train.tsv"
     max_length = cfg["training"]["max_sequence_length"]
 
@@ -122,6 +123,10 @@ def main() -> None:
         help="Resume from a run dir, or pass bare --resume to continue the "
         "latest run matching this arch/data-mode/qat (fresh start if none)",
     )
+    parser.add_argument("--dataset-dir", default=None,
+                        help="dir with train.tsv/kd_train.tsv/valid.tsv (e.g. a Kaggle input); defaults to data.processed_dir")
+    parser.add_argument("--tokenizer-model", default=None,
+                        help="SentencePiece .model path; defaults to tokenizer.model_prefix")
     parser.add_argument("--config", default=None)
     args = parser.parse_args()
 
@@ -130,7 +135,8 @@ def main() -> None:
     device = pick_device()
 
     # Loading SentencePiece Tokenizer
-    tokenizer = load_tokenizer(cfg)
+    tokenizer_path = Path(args.tokenizer_model).expanduser().resolve() if args.tokenizer_model else None
+    tokenizer = load_tokenizer(cfg, tokenizer_path)
 
     prune_cfg = cfg.get("pruning", {})
 
@@ -168,8 +174,9 @@ def main() -> None:
     print(f"Run dir: {run_dir} | device: {device}")
     print(f"Hyperparameters: {hparams}")
 
+    dataset_dir = Path(args.dataset_dir).expanduser().resolve() if args.dataset_dir else None
     train_loader, val_loader = make_loaders(
-        cfg, tokenizer, args.data_mode, hparams["batch_size"], device
+        cfg, tokenizer, args.data_mode, hparams["batch_size"], device, dataset_dir
     )
     model = build_model(
         args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=args.qat

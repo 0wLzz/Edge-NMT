@@ -38,6 +38,7 @@ def read_pairs(tsv_path: Path, limit: int | None = None) -> list[tuple[str, str]
     pairs -- train.tsv preserves CCMatrix's LASER-margin order, so the first N
     rows are the highest-quality pairs and reading only those avoids loading the
     full (multi-GB) file into memory."""
+    
     pairs = []
     with open(tsv_path, newline="") as f:
         reader = csv.reader(f, delimiter="\t", quoting=csv.QUOTE_NONE, escapechar="\\")

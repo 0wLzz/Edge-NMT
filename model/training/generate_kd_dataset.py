@@ -22,7 +22,7 @@ import math
 
 import torch
 from tqdm import tqdm
-from transformers import MBart50TokenizerFast, MBartForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from common.config import load_config, pick_device, resolve_path
 from common.results import load_json, save_json
@@ -31,10 +31,13 @@ from model.training.dataset import read_pairs
 
 def load_teacher(cfg: dict, device: torch.device):
     teacher_cfg = cfg["teacher"]
-    tokenizer = MBart50TokenizerFast.from_pretrained(
+
+    tokenizer = AutoTokenizer.from_pretrained(
         teacher_cfg["model_name"], src_lang=teacher_cfg["source_lang_code"]
     )
-    model = MBartForConditionalGeneration.from_pretrained(teacher_cfg["model_name"])
+
+    dtype = torch.float16
+    model = AutoModelForSeq2SeqLM.from_pretrained(teacher_cfg["model_name"], torch_dtype=dtype)
     return tokenizer, model.to(device).eval()
 
 
@@ -43,12 +46,15 @@ def translate_batch(sources, tokenizer, model, teacher_cfg, device) -> list[str]
     inputs = tokenizer(
         sources, return_tensors="pt", padding=True, truncation=True, max_length=256
     ).to(device)
+
     generated = model.generate(
         **inputs,
-        forced_bos_token_id=tokenizer.lang_code_to_id[teacher_cfg["target_lang_code"]],
+        # forced_bos_token_id=tokenizer.lang_code_to_id[teacher_cfg["target_lang_code"]],
+        forced_bos_token_id=tokenizer.convert_tokens_to_ids(teacher_cfg["target_lang_code"]),
         num_beams=teacher_cfg["num_beams"],
         max_new_tokens=teacher_cfg["max_new_tokens"],
     )
+
     return tokenizer.batch_decode(generated, skip_special_tokens=True)
 
 
@@ -64,9 +70,7 @@ def main() -> None:
     output_path = processed_dir / "kd_train.tsv"
     progress_path = processed_dir / "kd_train.progress.json"
 
-    pairs = read_pairs(processed_dir / "train.tsv")
-    if args.limit:
-        pairs = pairs[: args.limit]
+    pairs = read_pairs(processed_dir / "2M" / "train.tsv", limit=args.limit)
     sources = [source for source, _ in pairs]
 
     # Resume from the last completed batch if a previous run was interrupted.
@@ -74,6 +78,7 @@ def main() -> None:
     if progress_path.exists() and output_path.exists():
         done = min(load_json(progress_path)["processed_sources"], len(sources))
         print(f"Resuming: {done}/{len(sources)} sources already translated")
+
     if done >= len(sources):
         print(f"Already complete: {output_path}")
         return
@@ -90,13 +95,16 @@ def main() -> None:
             total=math.ceil(len(sources) / batch_size),
             desc="Teacher translating",
         )
+
         for start in progress:
             batch = sources[start : start + batch_size]
             translations = translate_batch(batch, tokenizer, model, teacher_cfg, device)
+
             for source, translation in zip(batch, translations):
                 translation = translation.replace("\t", " ").replace("\n", " ").strip()
                 if translation:
                     writer.writerow([source, translation])
+                    
             f.flush()
             save_json(
                 progress_path,

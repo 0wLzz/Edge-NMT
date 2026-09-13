@@ -62,10 +62,10 @@ tokenizer:
 teacher:
   # Sequence-level KD: the teacher translates the training sources once,
   # and students train on (source, teacher_translation) pairs.
-  model_name: facebook/nllb-200-1.3B
-  source_lang_code: eng_Latn
-  target_lang_code: ind_Latn
-  batch_size: 16   # NLLB-200-1.3B in fp16 fits a T4
+  model_name: facebook/mbart-large-50-many-to-many-mmt
+  source_lang_code: en_XX
+  target_lang_code: id_ID
+  batch_size: 32
   num_beams: 5
   max_new_tokens: 128
 

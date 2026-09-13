@@ -36,7 +36,7 @@ def load_teacher(cfg: dict, device: torch.device):
         teacher_cfg["model_name"], src_lang=teacher_cfg["source_lang_code"]
     )
 
-    dtype = torch.float16
+    dtype = torch.float16 if device.type == "cuda" else torch.float32
     model = AutoModelForSeq2SeqLM.from_pretrained(teacher_cfg["model_name"], torch_dtype=dtype)
     return tokenizer, model.to(device).eval()
 

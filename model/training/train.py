@@ -97,8 +97,7 @@ def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device, 
         DataLoader(val_dataset, shuffle=False, **loader_kwargs),
     )
 
-
-def main() -> None:
+def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arch", required=True, choices=["gru", "lstm", "transformer"])
     parser.add_argument("--data-mode", default="baseline", choices=["baseline", "kd"])
@@ -128,6 +127,11 @@ def main() -> None:
     parser.add_argument("--tokenizer-model", default=None,
                         help="SentencePiece .model path; defaults to tokenizer.model_prefix")
     parser.add_argument("--config", default=None)
+    return parser
+
+
+def main() -> None:
+    parser = argument_parser()
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -178,6 +182,7 @@ def main() -> None:
     train_loader, val_loader = make_loaders(
         cfg, tokenizer, args.data_mode, hparams["batch_size"], device, dataset_dir
     )
+    
     model = build_model(
         args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=args.qat
     )

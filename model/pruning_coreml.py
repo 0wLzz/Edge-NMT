@@ -97,9 +97,35 @@ class CoreMLMagnitudePruner:
             }
 
         config = _CTMagnitudePrunerConfig.from_dict({"global_config": global_config})
+        # Exclude the nn.Linear inside every nn.MultiheadAttention (its out_proj).
+        # nn.MultiheadAttention runs the functional attention path and reads
+        # out_proj.weight DIRECTLY instead of calling out_proj(x), so coremltools'
+        # per-forward pruning hook never fires to refresh the reparametrized
+        # weight -- the masked tensor from the previous step() keeps its autograd
+        # graph and is backpropagated a second time ("Trying to backward through
+        # the graph a second time"). This only bites the transformer (GRU/LSTM
+        # have no MHA). Skipping these keeps the pruned-layer set identical across
+        # arms; it is the same module the custom QAT (model/qat.py) skips. The
+        # FFN linears and the output projection are pruned normally.
+        self._excluded = self._unpruneable_linear_names(model)
+        for name in self._excluded:
+            config.set_module_name(name, None)
         self._pruner = _CTMagnitudePruner(model, config)
         self._prepared = False
-        self._n_layers = sum(1 for m in model.modules() if isinstance(m, nn.Linear))
+        self._n_layers = sum(1 for m in model.modules() if isinstance(m, nn.Linear)) - len(self._excluded)
+
+    @staticmethod
+    def _unpruneable_linear_names(model: nn.Module) -> list[str]:
+        """Fully-qualified names of nn.Linear layers that must not be pruned by
+        the reparametrization approach: those inside an nn.MultiheadAttention,
+        whose forward is bypassed by the functional attention path."""
+        names: list[str] = []
+        for mod_name, module in model.named_modules():
+            if isinstance(module, nn.MultiheadAttention):
+                for child_name, child in module.named_modules():
+                    if child_name and isinstance(child, nn.Linear):
+                        names.append(f"{mod_name}.{child_name}" if mod_name else child_name)
+        return names
 
     def prepare(self) -> int:
         """Install the pruning reparametrization. Returns the pruned-layer count."""

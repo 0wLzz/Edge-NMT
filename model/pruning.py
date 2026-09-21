@@ -84,8 +84,10 @@ class MagnitudePruner:
     ):
         if not 0.0 <= target_sparsity < 1.0:
             raise ValueError("target_sparsity must be in [0, 1)")
+        
         if end_step <= begin_step:
             raise ValueError("end_step must be greater than begin_step")
+        
         self.model = model
         self.target_sparsity = target_sparsity
         self.begin_step = begin_step

@@ -128,20 +128,27 @@ class Trainer:
         self.model.train()
         total_loss, batches = 0.0, 0
         iterator = self.train_loader
+
         if not self.quiet:
             iterator = tqdm(iterator, desc=f"Epoch {epoch}", leave=False)
+
         for batch in iterator:
             self.optimizer.zero_grad()
             loss = self._batch_loss(batch)
             loss.backward()
+
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
             self.optimizer.step()
+
             if self.scheduler is not None:
                 self.scheduler.step()
+
             if self.pruner is not None:
                 self.pruner.step()
+
             total_loss += loss.item()
             batches += 1
+            
         return total_loss / max(batches, 1)
 
     @torch.no_grad()
@@ -192,17 +199,29 @@ class Trainer:
     def train(self) -> float:
         """Run the full loop. Returns the best validation loss."""
         for epoch in range(self.start_epoch, self.epochs + 1):
+            # Training one Epoch
             train_loss = self._train_epoch(epoch)
+
+            # Validation
             val_loss = self.validate()
-            record = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss}
+
+            record = {
+                "epoch": epoch, 
+                "train_loss": train_loss, 
+                "val_loss": val_loss
+            }
+            
             if self.pruner is not None:
                 record["sparsity"] = round(self.pruner.current_sparsity(), 4)
+
             self.history.append(record)
+
             # Report to any observer (e.g. Optuna) before early-stopping logic so
             # a trial can be pruned on this epoch's val_loss. The callback may
             # raise (optuna.TrialPruned) to abort the run.
             if self.epoch_callback is not None:
                 self.epoch_callback(epoch, val_loss)
+
             is_best = self.early_stopping.step(val_loss)
             if not self.quiet:
                 marker = " *" if is_best else ""
@@ -215,12 +234,15 @@ class Trainer:
                     f"Epoch {epoch}: train_loss={train_loss:.4f} "
                     f"val_loss={val_loss:.4f}{sparsity}{marker}"
                 )
+
             if self.run_dir is not None:
                 if is_best:
                     save_checkpoint(self.run_dir / "best.pt", self.model, self.checkpoint_meta)
                 self.save_state(self.run_dir / "last.pt")
+
             if self.early_stopping.should_stop:
                 if not self.quiet:
                     print(f"Early stopping after epoch {epoch}")
                 break
+
         return self.early_stopping.best_loss

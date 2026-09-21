@@ -198,27 +198,35 @@ def main() -> None:
     # 1) dense fp32 baseline (also the source model for post-training pruning)
     baseline = None
     if args.baseline:
-        print("\n===== baseline (dense fp32) =====")
+        print("\n===== Baseline (Dense FP32) =====")
         set_seed(seed)
         baseline = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=False)
+        baseline.to(device)
+
+        # Train the baseline model
         make_trainer(baseline).train()
+
+        # Evaluate the baseline model
         evaluate_variant("baseline", baseline)
 
     # 2) training-time gradual pruning, one fresh run per target sparsity
     if args.prune_train:
         for s in args.sparsities:
-            print(f"\n===== prune-train (coremltools, gradual) sparsity={s:.0%} =====")
+            print(f"\n===== Prune-Train (coremltools, gradual) sparsity={s:.0%} =====")
             set_seed(seed)
             model = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=False)
             model.to(device)
+
+            # Setting Gradiual Pruner
             pruner = CoreMLMagnitudePruner(
                 model, target_sparsity=s,
                 begin_step=begin_step, end_step=end_step,
                 update_frequency=update_frequency, one_shot=False,
             )
             n = pruner.prepare()
-            print(f"[prune-train] gradual to {s:.0%} over steps {begin_step}..{end_step} "
+            print(f"[Prune-Train] Gradual pruning to {s:.0%} over steps {begin_step}..{end_step} "
                   f"({n} Linear layers)")
+            
             make_trainer(model, pruner=pruner).train()
             pruner.finalize()
             evaluate_variant(f"prune-train@{s:g}", model)
@@ -226,7 +234,7 @@ def main() -> None:
     # 3) post-training one-shot pruning of the trained baseline, per target sparsity
     if args.prune_post:
         for s in args.sparsities:
-            print(f"\n===== prune-post (coremltools, one-shot) sparsity={s:.0%} =====")
+            print(f"\n===== Prune-Post (coremltools, one-shot) sparsity={s:.0%} =====")
             model = copy.deepcopy(baseline)
             model.to(device)
             pruner = CoreMLMagnitudePruner(model, target_sparsity=s, one_shot=True)

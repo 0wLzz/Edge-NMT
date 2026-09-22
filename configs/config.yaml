@@ -115,13 +115,14 @@ hyperparameter_search:
       batch_size: [32, 64, 128]
 
 training:
-  epochs: 20
+  epochs: 30
   weight_decay: 0.01
   label_smoothing: 0.1
   grad_clip: 1.0
   early_stopping_patience: 3
   max_sequence_length: 128
   num_workers: 2
+  
   # LR schedule: linear warmup then decay, stepped every optimizer step. Applied
   # in both the hyperparameter search and full training so a config's searched
   # behaviour transfers to the real runs. Transformers in particular train poorly

@@ -96,6 +96,7 @@ def  apply_qat(model: nn.Module, momentum: float = 0.99) -> int:
     """Replace every nn.Linear in the model with a QATLinear. Returns the count."""
     # The fused transformer fast path reads weights directly and would skip
     # fake quantization during eval; force the regular (quantized) code path.
+    
     try:
         torch.backends.mha.set_fastpath_enabled(False)
     except AttributeError:
@@ -110,6 +111,7 @@ def  apply_qat(model: nn.Module, momentum: float = 0.99) -> int:
                 # MultiheadAttention reads out_proj.weight directly (bypassing
                 # forward), so its projections cannot be fake-quantized here.
                 continue
+
             if isinstance(child, nn.Linear):
                 setattr(module, name, QATLinear(child, momentum))
                 replaced += 1

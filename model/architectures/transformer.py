@@ -64,6 +64,7 @@ class TransformerSeq2Seq(nn.Module):
         memory = self.transformer.encoder(
             self._embed(source), src_key_padding_mask=source_padding_mask
         )
+        
         return memory, source_padding_mask
 
     def decode(self, target_input, memory, source_padding_mask=None):

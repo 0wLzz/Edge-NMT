@@ -80,8 +80,9 @@ class CoreMLMagnitudePruner:
             global_config = {
                 "scheduler": {"begin_step": 0},
                 "target_sparsity": target_sparsity,
-                "granularity": "per_scalar",
+                "granularity": "per_scalar", # per_scalar is unstructured pruning
             }
+
         else:
             # PolynomialDecayScheduler over the ramp window; the mask is refreshed
             # only at the listed update steps, easing sparsity 0 -> target.
@@ -97,19 +98,14 @@ class CoreMLMagnitudePruner:
             }
 
         config = _CTMagnitudePrunerConfig.from_dict({"global_config": global_config})
-        # Exclude the nn.Linear inside every nn.MultiheadAttention (its out_proj).
-        # nn.MultiheadAttention runs the functional attention path and reads
-        # out_proj.weight DIRECTLY instead of calling out_proj(x), so coremltools'
-        # per-forward pruning hook never fires to refresh the reparametrized
-        # weight -- the masked tensor from the previous step() keeps its autograd
-        # graph and is backpropagated a second time ("Trying to backward through
-        # the graph a second time"). This only bites the transformer (GRU/LSTM
-        # have no MHA). Skipping these keeps the pruned-layer set identical across
-        # arms; it is the same module the custom QAT (model/qat.py) skips. The
-        # FFN linears and the output projection are pruned normally.
+
+        # Exclude any nn.Linear layers that are children of nn.MultiheadAttention, since
+        # the attention forward path bypasses the Linear modules and never projects their weights into the output.
         self._excluded = self._unpruneable_linear_names(model)
+
         for name in self._excluded:
             config.set_module_name(name, None)
+
         self._pruner = _CTMagnitudePruner(model, config)
         self._prepared = False
         self._n_layers = sum(1 for m in model.modules() if isinstance(m, nn.Linear)) - len(self._excluded)
@@ -144,8 +140,7 @@ class CoreMLMagnitudePruner:
         """One-shot application without a training loop (post-training arm)."""
         if not self._prepared:
             self.prepare()
-        # A single step lands on the ConstantSparsityScheduler's begin_step=0 and
-        # applies the full-target magnitude mask to the trained weights.
+
         self._pruner.step()
         self.global_step += 1
 
@@ -166,6 +161,7 @@ class CoreMLMagnitudePruner:
                 return sum(vals) / len(vals)
         except Exception:
             pass
+
         return sparsity_report(self.model)["sparsity"]
 
     def finalize(self) -> int:
@@ -174,8 +170,10 @@ class CoreMLMagnitudePruner:
         Returns the number of pruned layers. The result is a plain dense model
         whose Linear weights contain zeros, safe for the existing export path.
         """
+
         if self._prepared:
             self.model = self._pruner.finalize(inplace=True)
+
         return self._n_layers
 
     def restore_from_model(self, global_step: int) -> None:
@@ -185,8 +183,10 @@ class CoreMLMagnitudePruner:
         scheduler back to ``global_step`` keeps the ramp position consistent so a
         resumed run continues with the same schedule.
         """
+        
         if not self._prepared:
             self.prepare()
+
         self.global_step = global_step
         for _ in range(global_step):
             self._pruner.step()

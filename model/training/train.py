@@ -43,9 +43,7 @@ from model.training.trainer import Trainer
 def find_resume_run_dir(resume: str | None, run_name: str):
     """Resolve the --resume argument to an existing run dir (or None).
 
-    "latest" picks the newest results/runs/<timestamp>_<run_name> that has a
-    resume state; timestamps prefix the names, so lexicographic order is
-    chronological.
+    "latest" picks the newest results/runs/<timestamp>_<run_name> that has a resume state;
     """
     if resume is None:
         return None
@@ -61,6 +59,7 @@ def find_resume_run_dir(resume: str | None, run_name: str):
         for d in (RESULTS_DIR / "runs").glob(f"*_{run_name}")
         if (d / "last.pt").exists()
     )
+
     return candidates[-1] if candidates else None
 
 
@@ -129,6 +128,32 @@ def argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", default=None)
     return parser
 
+def prep_prune(model, prune_cfg : dict, cfg : dict, train_loader: DataLoader, target_sparsity: float) -> MagnitudePruner:
+    """Build the CoreMLMagnitudePruner and prepare it for gradual pruning."""
+
+    steps_per_epoch = max(len(train_loader), 1)
+    total_steps = steps_per_epoch * cfg["training"]["epochs"]
+    begin_step = int(prune_cfg.get("begin_step_fraction", 0.1) * total_steps)
+    end_step = int(prune_cfg.get("end_step_fraction", 0.7) * total_steps)
+    end_step = max(end_step, begin_step + 1)
+
+    pruner = MagnitudePruner(
+        model,
+        target_sparsity=target_sparsity,
+        begin_step=begin_step,
+        end_step=end_step,
+        update_frequency=prune_cfg.get("update_frequency", 100),
+    )
+
+    n_layers = pruner.prepare()
+
+    print(
+        f"[Prune] Gradual magnitude pruning to {target_sparsity:.0%} sparsity "
+        f"on {n_layers} Linear layers "
+        f"(ramp steps {begin_step}->{end_step} of {total_steps})"
+    )
+
+    return pruner
 
 def main() -> None:
     parser = argument_parser()
@@ -148,7 +173,7 @@ def main() -> None:
     target_sparsity = (
         args.target_sparsity
         if args.target_sparsity is not None
-        else prune_cfg.get("target_sparsity", 0.5)
+        else prune_cfg.get("target_sparsity", 0.75)
     )
 
     # Getting Run Name
@@ -170,11 +195,13 @@ def main() -> None:
                     f"Cannot resume {run_dir}: its {key}={meta.get(key, False)!r} does not "
                     f"match the requested {value!r}"
                 )
+            
         hparams = meta["hparams"]
         print(f"Resuming run: {run_dir}")
     else:
         hparams = load_best_hparams(args.arch, cfg, args.hparams)
         run_dir = create_run_dir("runs", run_name)
+
     print(f"Run dir: {run_dir} | device: {device}")
     print(f"Hyperparameters: {hparams}")
 
@@ -206,24 +233,7 @@ def main() -> None:
     # derived from the planned run length; begin/end fractions come from config.
     pruner = None
     if args.prune:
-        steps_per_epoch = max(len(train_loader), 1)
-        total_steps = steps_per_epoch * cfg["training"]["epochs"]
-        begin_step = int(prune_cfg.get("begin_step_fraction", 0.1) * total_steps)
-        end_step = int(prune_cfg.get("end_step_fraction", 0.7) * total_steps)
-        end_step = max(end_step, begin_step + 1)
-        pruner = MagnitudePruner(
-            model,
-            target_sparsity=target_sparsity,
-            begin_step=begin_step,
-            end_step=end_step,
-            update_frequency=prune_cfg.get("update_frequency", 100),
-        )
-        n_layers = pruner.prepare()
-        print(
-            f"[prune] Gradual magnitude pruning to {target_sparsity:.0%} sparsity "
-            f"on {n_layers} Linear layers "
-            f"(ramp steps {begin_step}->{end_step} of {total_steps})"
-        )
+        pruner = prep_prune(model, prune_cfg, cfg, train_loader, target_sparsity)
 
     trainer = Trainer(
         model,
@@ -242,14 +252,16 @@ def main() -> None:
         pruner=pruner,
         scheduler_cfg=cfg["training"].get("scheduler"),
     )
+
     last_state = run_dir / "last.pt"
     if args.resume and last_state.exists():
         resumed_epoch = trainer.load_state(last_state)
         print(f"Resumed training at epoch {resumed_epoch}")
+
     best_val_loss = trainer.train()
 
     save_json(run_dir / "history.json", {"best_val_loss": best_val_loss, "epochs": trainer.history})
-    print(f"Best val_loss={best_val_loss:.4f} | checkpoint: {run_dir / 'best.pt'}")
+    print(f"Best val_loss={best_val_loss:.4f} | best: {run_dir / 'best.pt'} | final: {run_dir / 'final.pt'}")
 
 
 if __name__ == "__main__":

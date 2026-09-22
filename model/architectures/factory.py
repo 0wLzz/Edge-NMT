@@ -38,13 +38,18 @@ def split_hparams(arch: str, hparams: dict) -> tuple[dict, dict]:
 def build_model(
     arch: str, vocab_size: int, pad_id: int, hparams: dict, qat: bool = False
 ) -> nn.Module:
+    """Build a model from hyperparameters, optionally wrapping it for QAT."""
+
     if arch not in ARCHITECTURES:
         raise ValueError(f"Unknown architecture '{arch}'. Choose from {list(ARCHITECTURES)}")
+    
     model_hparams, _ = split_hparams(arch, hparams)
     model = ARCHITECTURES[arch](vocab_size=vocab_size, pad_id=pad_id, **model_hparams)
+
     if qat:
         replaced = apply_qat(model)
-        print(f"[qat] Fake quantization applied to {replaced} Linear layers")
+        print(f"[QAT] Fake quantization applied to {replaced} Linear layers")
+
     return model
 
 

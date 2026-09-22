@@ -184,16 +184,20 @@ class Trainer:
         state = torch.load(path, map_location=self.device, weights_only=False)
         self.model.load_state_dict(state["state_dict"])
         self.optimizer.load_state_dict(state["optimizer"])
+
         if self.scheduler is not None and state.get("scheduler") is not None:
             self.scheduler.load_state_dict(state["scheduler"])
+
         self.early_stopping.best_loss = state["best_loss"]
         self.early_stopping.bad_epochs = state["bad_epochs"]
         self.history = state["history"]
         self.start_epoch = state["epoch"] + 1
+
         if self.pruner is not None and state.get("pruner_step") is not None:
             # Rebuild masks from the loaded (already-zeroed) weights and resume
             # the schedule where it left off.
             self.pruner.restore_from_model(state["pruner_step"])
+            
         return self.start_epoch
 
     def train(self) -> float:
@@ -244,5 +248,13 @@ class Trainer:
                 if not self.quiet:
                     print(f"Early stopping after epoch {epoch}")
                 break
+
+        # Training finished: persist the final-epoch model. best.pt already holds
+        # the lowest-val-loss checkpoint; final.pt is the model in its last state
+        # (identical to best.pt only if the last epoch was the best one).
+        if self.run_dir is not None:
+            save_checkpoint(self.run_dir / "final.pt", self.model, self.checkpoint_meta)
+            if not self.quiet:
+                print(f"Training complete \u2014 saved final model to {self.run_dir / 'final.pt'}")
 
         return self.early_stopping.best_loss

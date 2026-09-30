@@ -204,6 +204,7 @@ def main() -> None:
 
     print(f"Run dir: {run_dir} | device: {device}")
     print(f"Hyperparameters: {hparams}")
+    print(f"Scheduler config: {cfg['training'].get('scheduler')}")
 
     dataset_dir = Path(args.dataset_dir).expanduser().resolve() if args.dataset_dir else None
     train_loader, val_loader = make_loaders(

@@ -83,6 +83,16 @@ hyperparameter_search:
   pruner: hyperband           # hyperband | median | none
   save_diagram: best_only     # per-trial torchinfo summary always logged; graphviz
                               # diagram rendered for: best_only | all | none (needs torchview)
+  # Trial LR schedule -- the one the existing search results were produced with.
+  # Kept separate from training.scheduler: a fixed 4k-step warmup would take up
+  # 21-85% of a 3-epoch trial on 200k pairs (more for larger batches), biasing
+  # the search toward small batch sizes. The search is a low-budget proxy that
+  # ranks configurations (Li et al., 2018); its LR is a starting point for the
+  # full-scale schedule below.
+  scheduler:
+    type: cosine
+    warmup_ratio: 0.06        # 6% of the trial's own steps (281-1,125 steps)
+    min_lr_ratio: 0.0
   # Search space per architecture. Types:
   #   [a, b]            -> categorical choice among the listed values
   #   {int:  [lo, hi]}  -> integer range (inclusive)
@@ -115,6 +125,8 @@ hyperparameter_search:
       batch_size: [32, 64, 128]
 
 training:
+  # Upper bound only (compute cap). The actual run length is decided by early
+  # stopping on validation loss (Prechelt, 1998); best.pt = lowest val loss.
   epochs: 30
   weight_decay: 0.01
   label_smoothing: 0.1
@@ -122,15 +134,20 @@ training:
   early_stopping_patience: 3
   max_sequence_length: 128
   num_workers: 2
-  
-  # LR schedule: linear warmup then decay, stepped every optimizer step. Applied
-  # in both the hyperparameter search and full training so a config's searched
-  # behaviour transfers to the real runs. Transformers in particular train poorly
-  # without warmup, so this is a fixed default (not a tuned hyperparameter).
+
+  # LR schedule, stepped every optimizer step: linear warmup over a FIXED number
+  # of steps, then inverse-square-root decay (Vaswani et al., 2017). Neither part
+  # depends on `epochs` or dataset size, so every run (all architectures,
+  # baseline and KD) gets an identical schedule and changing the epoch cap
+  # cannot distort it. Warmup stabilizes early Adam steps (Liu et al., 2020) and
+  # is required for Post-LN Transformers (Xiong et al., 2020).
+  # Previous setting (GRU run of 2026-09-23): cosine, warmup_ratio 0.06 of the
+  # planned 30 epochs = ~1.8 epochs of warmup, LR still ~peak when early
+  # stopping fired -- the decay phase was never reached.
   scheduler:
-    type: cosine            # cosine | inverse_sqrt | none
-    warmup_ratio: 0.06      # fraction of total planned steps spent warming up
-    min_lr_ratio: 0.0       # cosine floor as a fraction of the peak LR
+    type: inverse_sqrt      # cosine | inverse_sqrt | none
+    warmup_steps: 4000      # fixed warmup length; overrides warmup_ratio when set
+    min_lr_ratio: 0.0       # cosine floor as a fraction of the peak LR (cosine only)
 
 quantization:
   # Asymmetric per-tensor uint8 fake quantization (QAT), applied to nn.Linear layers.

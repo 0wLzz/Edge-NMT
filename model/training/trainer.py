@@ -21,9 +21,18 @@ def build_lr_lambda(scheduler_cfg: dict, total_steps: int) -> Callable[[int], fl
     LambdaLR. `total_steps` is the planned number of optimizer steps
     (steps_per_epoch * epochs); early stopping may cut it short, which only
     means the decay tail is not reached.
+
+    Warmup length: `warmup_steps` (fixed) takes precedence over `warmup_ratio`
+    (fraction of total_steps). A fixed length keeps warmup identical across runs
+    regardless of dataset size or the epoch cap; `inverse_sqrt` decay does not
+    depend on total_steps either, so the whole schedule is then independent of
+    the planned run length (Vaswani et al., 2017).
     """
     sched_type = scheduler_cfg.get("type", "none")
-    warmup_steps = max(1, int(scheduler_cfg.get("warmup_ratio", 0.0) * total_steps))
+    if scheduler_cfg.get("warmup_steps") is not None:
+        warmup_steps = max(1, int(scheduler_cfg["warmup_steps"]))
+    else:
+        warmup_steps = max(1, int(scheduler_cfg.get("warmup_ratio", 0.0) * total_steps))
     min_lr_ratio = scheduler_cfg.get("min_lr_ratio", 0.0)
 
     def lr_lambda(step: int) -> float:

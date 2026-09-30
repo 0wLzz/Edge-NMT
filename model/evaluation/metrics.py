@@ -16,6 +16,15 @@ def compute_bleu(hypotheses: list[str], references: list[str]) -> dict:
     return {"bleu": round(result.score, 2), "bleu_signature": str(result.format())}
 
 
+def sentence_bleu_scores(hypotheses: list[str], references: list[str]) -> list[float]:
+    """Per-sentence BLEU, for inspecting individual translations (not for reporting:
+    sentence BLEU is noisy; the corpus score is the reported number)."""
+    return [
+        round(sacrebleu.sentence_bleu(hyp, [ref]).score, 2)
+        for hyp, ref in zip(hypotheses, references)
+    ]
+
+
 def compute_chrf(hypotheses: list[str], references: list[str]) -> dict:
     # word_order=2 makes this chrF++.
     result = sacrebleu.corpus_chrf(hypotheses, [references], word_order=2)
@@ -30,8 +39,10 @@ def compute_all(
     meteor: bool = False,
 ) -> dict:
     """BLEU always; chrF++ and METEOR gated by flags (see config `evaluation`)."""
+    
     metrics = {}
     metrics.update(compute_bleu(hypotheses, references))
+
     if chrf:
         metrics.update(compute_chrf(hypotheses, references))
     if meteor:

@@ -271,7 +271,9 @@ def make_objective(
             epochs=search_cfg["trial_epochs"],
             early_stopping_patience=cfg["training"]["early_stopping_patience"],
             quiet=True,
-            scheduler_cfg=cfg["training"].get("scheduler"),
+            # Trials keep their own schedule (see config hyperparameter_search.scheduler):
+            # a fixed 4k-step warmup would swallow most of a short trial.
+            scheduler_cfg=search_cfg.get("scheduler", cfg["training"].get("scheduler")),
             epoch_callback=epoch_callback,
         )
         return trainer.train()

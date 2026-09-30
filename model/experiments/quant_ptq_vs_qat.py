@@ -202,7 +202,10 @@ def main() -> None:
             epochs=epochs,
             early_stopping_patience=cfg["training"]["early_stopping_patience"],
             quiet=False,
-            scheduler_cfg=cfg["training"].get("scheduler"),
+            # Same schedule as the Optuna search this experiment mirrors.
+            scheduler_cfg=cfg["hyperparameter_search"].get(
+                "scheduler", cfg["training"].get("scheduler")
+            ),
         )
 
     results: dict[str, dict] = {}

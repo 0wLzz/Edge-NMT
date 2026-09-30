@@ -181,7 +181,10 @@ def main() -> None:
             epochs=epochs,
             early_stopping_patience=config["training"]["early_stopping_patience"],
             quiet=False,
-            scheduler_cfg=config["training"].get("scheduler"),
+            # Same schedule as the Optuna search this experiment mirrors.
+            scheduler_cfg=config["hyperparameter_search"].get(
+                "scheduler", config["training"].get("scheduler")
+            ),
             pruner=pruner,
         )
 

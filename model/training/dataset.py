@@ -40,11 +40,13 @@ def read_pairs(tsv_path: Path, limit: int | None = None) -> list[tuple[str, str]
     full (multi-GB) file into memory."""
     
     pairs = []
-    with open(tsv_path, newline="") as f:
-        reader = csv.reader(f, delimiter="\t", quoting=csv.QUOTE_NONE, escapechar="\\")
+    with open(tsv_path, newline="", encoding="utf-8") as file:
+        reader = csv.reader(file, delimiter="\t", quoting=csv.QUOTE_NONE, escapechar="\\")
+        
         for row in reader:
             if len(row) == 2:
                 pairs.append((row[0], row[1]))
+
                 if limit is not None and len(pairs) >= limit:
                     break
     return pairs

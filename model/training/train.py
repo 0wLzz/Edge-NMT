@@ -126,6 +126,9 @@ def argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tokenizer-model", default=None,
                         help="SentencePiece .model path; defaults to tokenizer.model_prefix")
     parser.add_argument("--config", default=None)
+
+    parser.add_argument("--last-model", default=None,
+                        help="Path to a last.pt checkpoint to resume from (overrides --resume)")
     return parser
 
 def prep_prune(model, prune_cfg : dict, cfg : dict, train_loader: DataLoader, target_sparsity: float) -> MagnitudePruner:
@@ -254,7 +257,7 @@ def main() -> None:
         scheduler_cfg=cfg["training"].get("scheduler"),
     )
 
-    last_state = run_dir / "last.pt"
+    last_state = Path(args.last_model).expanduser().resolve() if args.last_model else run_dir / "last.pt"
     if args.resume and last_state.exists():
         resumed_epoch = trainer.load_state(last_state)
         print(f"Resumed training at epoch {resumed_epoch}")

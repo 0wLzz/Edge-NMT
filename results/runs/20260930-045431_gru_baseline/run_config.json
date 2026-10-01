@@ -1,0 +1,19 @@
+{
+  "arch": "gru",
+  "hparams": {
+    "embedding_dim": 512,
+    "hidden_dim": 512,
+    "num_layers": 2,
+    "dropout": 0.2486475607053254,
+    "learning_rate": 0.000557682742461972,
+    "batch_size": 32
+  },
+  "vocab_size": 32000,
+  "pad_id": 3,
+  "bos_id": 1,
+  "eos_id": 2,
+  "data_mode": "baseline",
+  "qat": false,
+  "prune": false,
+  "target_sparsity": 0.0
+}

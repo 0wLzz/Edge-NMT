@@ -17,6 +17,11 @@ arch/data-mode/qat/prune and continues it (starting fresh if none exists), so
 the same command is safe to rerun daily on Colab. `--resume <run_dir>` targets
 a specific run.
 
+On time-boxed GPUs (Kaggle 12h), `--time-budget 11.5` stops the session after
+the last epoch that fits, and `--session-epochs N` after N epochs, instead of
+being killed mid-epoch and losing it. Both only end the session (no final.pt);
+rerun with --resume to continue.
+
 Usage:
     python -m model.training.train --arch transformer --data-mode kd --qat
     python -m model.training.train --arch transformer --data-mode kd --qat --prune
@@ -27,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import time
 from pathlib import Path
 
 from torch.utils.data import DataLoader
@@ -129,6 +135,12 @@ def argument_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--last-model", default=None,
                         help="Path to a last.pt checkpoint to resume from (overrides --resume)")
+    parser.add_argument("--session-epochs", type=int, default=None,
+                        help="Stop this session cleanly after N epochs (last.pt saved); continue "
+                        "with --resume. Does not change training.epochs or the LR/pruning schedule")
+    parser.add_argument("--time-budget", type=float, default=None,
+                        help="Session time budget in hours (e.g. 11.5 on Kaggle's 12h limit): stop "
+                        "after the last epoch that fits instead of being killed mid-epoch")
     return parser
 
 def prep_prune(model, prune_cfg : dict, cfg : dict, train_loader: DataLoader, target_sparsity: float) -> MagnitudePruner:
@@ -161,6 +173,8 @@ def prep_prune(model, prune_cfg : dict, cfg : dict, train_loader: DataLoader, ta
 def main() -> None:
     parser = argument_parser()
     args = parser.parse_args()
+    # Measured from process start so data loading/tokenization counts too.
+    deadline = time.monotonic() + args.time_budget * 3600 if args.time_budget else None
 
     cfg = load_config(args.config)
     set_seed(cfg["seed"])
@@ -255,6 +269,8 @@ def main() -> None:
         checkpoint_meta=checkpoint_meta,
         pruner=pruner,
         scheduler_cfg=cfg["training"].get("scheduler"),
+        session_epochs=args.session_epochs,
+        deadline=deadline,
     )
 
     last_state = Path(args.last_model).expanduser().resolve() if args.last_model else run_dir / "last.pt"
@@ -265,7 +281,11 @@ def main() -> None:
     best_val_loss = trainer.train()
 
     save_json(run_dir / "history.json", {"best_val_loss": best_val_loss, "epochs": trainer.history})
-    print(f"Best val_loss={best_val_loss:.4f} | best: {run_dir / 'best.pt'} | final: {run_dir / 'final.pt'}")
+    if trainer.session_interrupted:
+        print(f"Session ended early. Best val_loss so far={best_val_loss:.4f} | "
+              f"resume state: {run_dir / 'last.pt'}")
+    else:
+        print(f"Best val_loss={best_val_loss:.4f} | best: {run_dir / 'best.pt'} | final: {run_dir / 'final.pt'}")
 
 
 if __name__ == "__main__":

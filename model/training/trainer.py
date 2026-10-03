@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -88,6 +89,8 @@ class Trainer:
         pruner=None,
         scheduler_cfg: dict | None = None,
         epoch_callback: Callable[[int, float], None] | None = None,
+        session_epochs: int | None = None,
+        deadline: float | None = None,
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -107,6 +110,15 @@ class Trainer:
         # Optuna and raises optuna.TrialPruned to stop unpromising trials; keeping
         # it a plain callback means the trainer never imports optuna.
         self.epoch_callback = epoch_callback
+        # Per-session limits for time-boxed GPUs (Kaggle/Colab). They only end
+        # *this* session cleanly after a full epoch (last.pt saved) so --resume
+        # picks up next session; `epochs` stays the planned run length, so the
+        # LR schedule and pruning ramp are unaffected. `deadline` is a
+        # time.monotonic() value: stop if the slowest epoch so far would not
+        # finish before it.
+        self.session_epochs = session_epochs
+        self.deadline = deadline
+        self.session_interrupted = False
         self.criterion = nn.CrossEntropyLoss(
             ignore_index=pad_id, label_smoothing=label_smoothing
         )
@@ -211,7 +223,11 @@ class Trainer:
 
     def train(self) -> float:
         """Run the full loop. Returns the best validation loss."""
+        epochs_this_session = 0
+        slowest_epoch = 0.0
         for epoch in range(self.start_epoch, self.epochs + 1):
+            epoch_start = time.monotonic()
+
             # Training one Epoch
             train_loss = self._train_epoch(epoch)
 
@@ -258,10 +274,32 @@ class Trainer:
                     print(f"Early stopping after epoch {epoch}")
                 break
 
+            epochs_this_session += 1
+            slowest_epoch = max(slowest_epoch, time.monotonic() - epoch_start)
+            if epoch < self.epochs:
+                reason = None
+                if self.session_epochs is not None and epochs_this_session >= self.session_epochs:
+                    reason = f"session epoch limit ({self.session_epochs}) reached"
+                elif self.deadline is not None and time.monotonic() + slowest_epoch > self.deadline:
+                    left_min = max(0.0, self.deadline - time.monotonic()) / 60
+                    reason = (
+                        f"next epoch (~{slowest_epoch / 60:.1f} min) would not fit in the "
+                        f"remaining time budget ({left_min:.1f} min)"
+                    )
+                if reason is not None:
+                    self.session_interrupted = True
+                    if not self.quiet:
+                        print(
+                            f"Stopping session after epoch {epoch}: {reason}. "
+                            f"Rerun with --resume to continue from epoch {epoch + 1}."
+                        )
+                    break
+
         # Training finished: persist the final-epoch model. best.pt already holds
         # the lowest-val-loss checkpoint; final.pt is the model in its last state
-        # (identical to best.pt only if the last epoch was the best one).
-        if self.run_dir is not None:
+        # (identical to best.pt only if the last epoch was the best one). Skipped
+        # when only this session ended, since the run is not finished yet.
+        if self.run_dir is not None and not self.session_interrupted:
             save_checkpoint(self.run_dir / "final.pt", self.model, self.checkpoint_meta)
             if not self.quiet:
                 print(f"Training complete \u2014 saved final model to {self.run_dir / 'final.pt'}")

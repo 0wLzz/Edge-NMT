@@ -51,6 +51,8 @@ python -m model.training.hyperparameter_search --arch transformer
 #    -> results/runs/<timestamp>_<name>/best.pt
 #    Resumable: last.pt written every epoch; add bare --resume to continue the
 #    latest matching run (fresh start if none exists).
+#    On Kaggle/Colab add --time-budget 11.5 (hours) or --session-epochs N so the
+#    session ends after a full epoch instead of being killed mid-epoch.
 python -m model.training.train --arch transformer --data-mode baseline
 python -m model.training.train --arch transformer --data-mode kd
 python -m model.training.train --arch transformer --data-mode kd --qat --resume

@@ -263,6 +263,30 @@ def main() -> None:
         results[name] = row
         print(f"[{name}] {row}")
 
+    def save_variant(file_stem: str, model, target_sparsity: float = 0.0) -> None:
+        """Self-describing checkpoint (same {meta, state_dict} format as train.py),
+        so evaluate / quantize / convert_coreml can load it with
+        factory.load_checkpoint. coremltools' finalize() leaves `_COREML_/...`
+        metadata buffers in the state_dict that a freshly built model does not
+        have; they are dropped (the zeros themselves live in the weights)."""
+        meta = {
+            "arch": ex_ags.arch,
+            "hparams": ex_ags.hparams,
+            "vocab_size": tokenizer.vocab_size(),
+            "pad_id": tokenizer.pad_id(),
+            "bos_id": tokenizer.bos_id(),
+            "eos_id": tokenizer.eos_id(),
+            "data_mode": "baseline",
+            "qat": False,
+            "prune": target_sparsity > 0,
+            "target_sparsity": target_sparsity,
+        }
+        state_dict = {k: v for k, v in model.state_dict().items() if "_COREML_" not in k}
+        path = ex_ags.out_dir / f"{ex_ags.arch}_{file_stem}.pt"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"meta": meta, "state_dict": state_dict}, path)
+        print(f"[Save] {file_stem} -> {path}")
+
     results: dict[str, dict] = {}
 
     # 1) dense fp32 baseline (also the source model for post-training pruning)
@@ -270,16 +294,13 @@ def main() -> None:
     if "baseline" in ex_ags.arms:
         print("\n===== Baseline (Dense FP32) =====")
         baseline = new_model()
-        baseline_trainer = make_trainer(baseline)
-        baseline_trainer.train()
+        make_trainer(baseline).train()
 
         # Evaluate the baseline model
         evaluate_variant("baseline", baseline)
 
         # Save the trained baseline
-        baseline_path = ex_ags.out_dir / f"{ex_ags.arch}_baseline.pt"
-        baseline_trainer.save_state(baseline_path)
-        print(f"[Baseline] Saved trained baseline to {baseline_path}")
+        save_variant("baseline", baseline)
 
     # 2) training-time gradual pruning, one fresh run per target sparsity
     if "prune-train" in ex_ags.arms:
@@ -298,15 +319,12 @@ def main() -> None:
             print(f"[Prune-Train] Gradual pruning to {sparsity:.0%} over steps {begin_step}..{end_step} "
                   f"({n} Linear layers)")
             
-            qat_trainer = make_trainer(model, pruner=pruner)
-            qat_trainer.train()
-            pruner.finalize()
+            make_trainer(model, pruner=pruner).train()
+            pruner.finalize()  # bake masks into plain weights before eval/save
             evaluate_variant(f"prune-train@{sparsity:g}", model)
 
             # Save the trained pruned model
-            save_path = ex_ags.out_dir / f"{ex_ags.arch}_prune_train_{sparsity:g}.pt"
-            qat_trainer.save_state(save_path)
-            print(f"[Prune-Train] Saved trained pruned model to {save_path}")
+            save_variant(f"prune_train_{sparsity:g}", model, sparsity)
 
     # 3) post-training one-shot pruning of the trained baseline, per target sparsity
     if "prune-post" in ex_ags.arms:
@@ -320,11 +338,8 @@ def main() -> None:
             pruner.finalize()
             evaluate_variant(f"prune-post@{sparsity:g}", model)
 
-            # Save the trained pruned model
-            save_path = ex_ags.out_dir / f"{ex_ags.arch}_prune_post_{sparsity:g}.pt"
-            post_trainer = make_trainer(model)
-            post_trainer.save_state(save_path)
-            print(f"[Prune-Post] Saved trained pruned model to {save_path}")
+            # Save the one-shot pruned model
+            save_variant(f"prune_post_{sparsity:g}", model, sparsity)
 
     # ---- deltas vs the dense baseline ---------------------------------------
     if "baseline" in ex_ags.arms:

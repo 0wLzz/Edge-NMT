@@ -18,6 +18,9 @@ Usage:
 
 from __future__ import annotations
 
+import os
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 import argparse
 import csv
 from datetime import datetime
@@ -181,8 +184,7 @@ def main() -> None:
             "tokenizer": str(tokenizer_path or "config default"),
         },
     )
-    with open(run_dir / "hypotheses.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(hypotheses))
+
     export_translations(run_dir / "translations.csv", examples, hypotheses)
 
     append_summary(

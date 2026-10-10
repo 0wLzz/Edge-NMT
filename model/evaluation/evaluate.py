@@ -156,7 +156,7 @@ def main() -> None:
 
     metrics.update(
         {
-            "params_millions": round(count_parameters(model) / 1e6, 2),
+            "params_millions": round(count_parameters(model) / 1e6, 4),
             "model_size_mb": model_size_mb(model),
         }
     )

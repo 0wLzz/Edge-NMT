@@ -181,6 +181,6 @@ def int8_size_report(model: nn.Module) -> dict:
     return {
         "quantized_linear_params": quantized_params,
         "float_params": float_params,
-        "fp32_size_mb": round(fp32_mb, 2),
-        "int8_size_mb": round(int8_mb, 2),
+        "fp32_size_mb": round(fp32_mb, 4),
+        "int8_size_mb": round(int8_mb, 4),
     }

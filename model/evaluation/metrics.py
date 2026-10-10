@@ -13,14 +13,14 @@ import sacrebleu
 
 def compute_bleu(hypotheses: list[str], references: list[str]) -> dict:
     result = sacrebleu.corpus_bleu(hypotheses, [references])
-    return {"bleu": round(result.score, 2), "bleu_signature": str(result.format())}
+    return {"bleu": round(result.score, 4), "bleu_signature": str(result.format())}
 
 
 def sentence_bleu_scores(hypotheses: list[str], references: list[str]) -> list[float]:
     """Per-sentence BLEU, for inspecting individual translations (not for reporting:
     sentence BLEU is noisy; the corpus score is the reported number)."""
     return [
-        round(sacrebleu.sentence_bleu(hyp, [ref]).score, 2)
+        round(sacrebleu.sentence_bleu(hyp, [ref]).score, 4)
         for hyp, ref in zip(hypotheses, references)
     ]
 
@@ -28,7 +28,7 @@ def sentence_bleu_scores(hypotheses: list[str], references: list[str]) -> list[f
 def compute_chrf(hypotheses: list[str], references: list[str]) -> dict:
     # word_order=2 makes this chrF++.
     result = sacrebleu.corpus_chrf(hypotheses, [references], word_order=2)
-    return {"chrf": round(result.score, 2)}
+    return {"chrf": round(result.score, 4)}
 
 
 def compute_all(

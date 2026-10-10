@@ -60,7 +60,7 @@ from model.training.hyperparameter_search import default_hparams, make_subset_lo
 from model.training.trainer import Trainer
 # Reuse the exact evaluation helpers the QAT experiment uses, so val_loss and
 # BLEU are computed identically and the two experiments are comparable.
-from model.experiments.quant_ptq_vs_qat import eval_val_loss, generation_metrics
+from model.experiments.quant_ptq_vs_qat import eval_val_loss, format_cell, generation_metrics
 
 
 def load_hparams(arch: str, config: dict, override: str | None) -> dict:
@@ -90,8 +90,8 @@ def prune_size_report(model: nn.Module) -> dict:
         "sparsity": rep["sparsity"],
         "linear_weight_params": total,
         "nonzero_linear_params": nonzero,
-        "dense_linear_mb": round(total * 4 / 1e6, 2),
-        "sparse_linear_mb": round(nonzero * 4 / 1e6, 2),
+        "dense_linear_mb": round(total * 4 / 1e6, 4),
+        "sparse_linear_mb": round(nonzero * 4 / 1e6, 4),
     }
 
 def validate_arms(args: argparse.Namespace) -> list[str]:
@@ -344,12 +344,14 @@ def main() -> None:
     # ---- deltas vs the dense baseline ---------------------------------------
     if "baseline" in ex_ags.arms:
         base = results["baseline"]
-        for name, r in results.items():
+        for name, result in results.items():
             if name == "baseline":
                 continue
-            r["val_loss_delta_vs_dense"] = round(r["val_loss"] - base["val_loss"], 4)
-            if ex_ags.do_gen and "bleu" in r and "bleu" in base:
-                r["bleu_delta_vs_dense"] = round(r["bleu"] - base["bleu"], 2)
+
+            result["val_loss_delta_vs_dense"] = round(result["val_loss"] - base["val_loss"], 4)
+            
+            if ex_ags.do_gen and "bleu" in result and "bleu" in base:
+                result["bleu_delta_vs_dense"] = round(result["bleu"] - base["bleu"], 4)
 
     ex_ags.out_dir.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -370,23 +372,38 @@ def main() -> None:
     out_path = ex_ags.out_dir / f"{ex_ags.arch}_prune_post_vs_train.json"
     save_json(out_path, payload)
 
+    def make_table_cols() -> list[str]:
+        cols = ["val_loss"]
+
+        if ex_ags.do_gen:
+            cols.append("bleu")
+
+            if ex_ags.meteor:
+                cols.append("meteor")
+                
+        cols +=["sparsity", "sparse_linear_mb", "dense_linear_mb"]
+
+        return cols
+
     # printed comparison table
-    cols = ["val_loss"] + (["bleu"] if ex_ags.do_gen else []) + (["meteor"] if (ex_ags.do_gen and ex_ags.meteor) else []) \
-        + ["sparsity", "sparse_linear_mb", "dense_linear_mb"]
-    print("\n================ post vs train pruning ({}) ================".format(ex_ags.arch))
-    header = "variant".ljust(18) + "".join(c.rjust(14) for c in cols)
-    print(header); print("-" * len(header))
+    cols = make_table_cols()
+    print(f"\n================ Post vs Train pruning ({ex_ags.arch}) ================")
+
+    header = "Variant".ljust(18) + "".join(col.rjust(18) for col in cols)
+    print(header)
+    print("-" * len(header))
+
     for name in results:
-        r = results[name]
-        line = name.ljust(18) + "".join(str(r.get(c, "")).rjust(14) for c in cols)
+        result = results[name]
+        line = name.ljust(18) + "".join(format_cell(result.get(c, "")).rjust(18) for c in cols)
         print(line)
 
-    print("\nDeltas vs dense fp32 (positive val_loss / negative BLEU = worse):")
-    for name, r in results.items():
+    print("\nDeltas vs Dense fp32 (positive val_loss / negative BLEU = worse):")
+    for name, result in results.items():
         if name == "baseline":
             continue
-        print(f"  {name}: val_loss {r.get('val_loss_delta_vs_dense', float('nan')):+.4f}"
-                + (f"   BLEU {r.get('bleu_delta_vs_dense', float('nan')):+.2f}" if ex_ags.do_gen else ""))
+        print(f"  {name}: val_loss {result.get('val_loss_delta_vs_dense', float('nan')):+.4f}"
+                + (f"   BLEU {result.get('bleu_delta_vs_dense', float('nan')):+.4f}" if ex_ags.do_gen else ""))
     print(f"\nSaved: {out_path}")
 
 

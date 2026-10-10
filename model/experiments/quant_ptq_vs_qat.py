@@ -118,6 +118,11 @@ def generation_metrics(model, sources, references, tokenizer, cfg, device, meteo
         print(f"[metrics] METEOR unavailable ({exc}); reporting BLEU only")
         return compute_all(hyps, references, chrf=False, meteor=False)
 
+def format_cell(value) -> str:
+    """Comparison-table cell: floats always with 4 decimals (2.41 -> 2.4100)."""
+    return f"{value:.4f}" if isinstance(value, float) else str(value)
+
+
 def train_mode(args) -> list[str]:
     """Return the training mode for the experiment based on the provided arguments."""
     mode_flags = []
@@ -252,7 +257,7 @@ def main() -> None:
             r = results[name]
             r["val_loss_delta_vs_fp32"] = round(r["val_loss"] - base["val_loss"], 4)
             if do_gen and "bleu" in r and "bleu" in base:
-                r["bleu_delta_vs_fp32"] = round(r["bleu"] - base["bleu"], 2)
+                r["bleu_delta_vs_fp32"] = round(r["bleu"] - base["bleu"], 4)
 
     out_dir = Path(args.out_dir).expanduser().resolve() if args.out_dir else RESULTS_DIR / "quant_experiment"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -273,12 +278,12 @@ def main() -> None:
 
     # printed comparison table
     cols = ["val_loss"] + (["bleu"] if do_gen else []) + (["meteor"] if (do_gen and args.meteor) else []) + ["int8_size_mb", "fp32_size_mb"]
-    print("\n================ QAT vs PTQ ({}) ================".format(args.arch))
-    header = "variant".ljust(10) + "".join(c.rjust(14) for c in cols)
+    print(f"\n================ QAT vs PTQ ({args.arch}) ================")
+    header = "Variant".ljust(10) + "".join(col.rjust(14) for col in cols)
     print(header); print("-" * len(header))
     for name in training_modes:
         r = results[name]
-        line = name.ljust(10) + "".join(str(r.get(c, "")).rjust(14) for c in cols)
+        line = name.ljust(10) + "".join(format_cell(r.get(c, "")).rjust(14) for c in cols)
         print(line)
 
     if args.baseline and args.ptq and args.qat:
@@ -286,7 +291,7 @@ def main() -> None:
         for name in ("qat", "ptq"):
             r = results[name]
             print(f"  {name}: val_loss {r['val_loss_delta_vs_fp32']:+.4f}"
-                + (f"   BLEU {r.get('bleu_delta_vs_fp32', float('nan')):+.2f}" if do_gen else ""))
+                + (f"   BLEU {r.get('bleu_delta_vs_fp32', float('nan')):+.4f}" if do_gen else ""))
         print(f"\nSaved: {out_path}")
 
 

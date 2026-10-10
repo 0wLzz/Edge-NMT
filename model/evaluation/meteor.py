@@ -136,4 +136,4 @@ def compute_meteor(hypotheses: list[str], references: list[str]) -> dict:
         for hyp, ref in zip(hypotheses, references)
     ]
     mean = sum(scores) / len(scores) if scores else 0.0
-    return {"meteor": round(mean * 100, 2)}
+    return {"meteor": round(mean * 100, 4)}

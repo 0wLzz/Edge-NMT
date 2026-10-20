@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from model.architectures.factory import save_checkpoint
+from model.architectures.factory import atomic_torch_save, save_checkpoint
 
 
 def build_lr_lambda(scheduler_cfg: dict, total_steps: int) -> Callable[[int], float]:
@@ -183,7 +183,7 @@ class Trainer:
 
     def save_state(self, path: Path) -> None:
         """Full resume state: weights + optimizer + early-stopping progress."""
-        torch.save(
+        atomic_torch_save(
             {
                 "meta": self.checkpoint_meta,
                 "state_dict": self.model.state_dict(),

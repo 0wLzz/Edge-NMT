@@ -25,6 +25,20 @@ Metrics per arm:
     decoding,
   * fp32-vs-int8 size estimate (weights of the quantized Linear layers).
 
+Every arm is also saved as a self-describing checkpoint ({meta, state_dict},
+same format as train.py and the pruning experiment) so evaluate / convert_coreml
+can load it with factory.load_checkpoint:
+  <out_dir>/<arch>_baseline.pt   dense fp32
+  <out_dir>/<arch>_qat.pt        QAT model, folded (fold_qat)
+  <out_dir>/<arch>_ptq.pt        PTQ model, folded (fold_qat)
+Folded = the Linear weights are baked onto the uint8 grid and the QAT wrappers
+are removed, giving a plain float model. Weight quantization is kept;
+activation fake-quant is NOT (it only exists in the wrapped model), so
+re-evaluating a folded checkpoint gives W8-only numbers, not the W8A8 numbers in
+the results JSON.
+
+All reported numbers (JSON + printed table) use 4 decimal places.
+
 Usage (locally):
     python -m model.experiments.quant_ptq_vs_qat --arch gru
 Usage (Kaggle, mirroring the search runner):
@@ -47,7 +61,7 @@ import torch.nn as nn
 from common.config import load_config, pick_device, resolve_path, set_seed
 from common.results import RESULTS_DIR, save_json
 from model.architectures.factory import build_model
-from model.qat import FakeQuantize, apply_qat, int8_size_report, set_qat_enabled
+from model.qat import FakeQuantize, apply_qat, fold_qat, int8_size_report, set_qat_enabled
 from model.training.dataset import load_tokenizer, read_pairs
 from model.training.hyperparameter_search import default_hparams, make_subset_loaders
 from model.training.trainer import Trainer
@@ -119,8 +133,21 @@ def generation_metrics(model, sources, references, tokenizer, cfg, device, meteo
         return compute_all(hyps, references, chrf=False, meteor=False)
 
 def format_cell(value) -> str:
-    """Comparison-table cell: floats always with 4 decimals (2.41 -> 2.4100)."""
-    return f"{value:.4f}" if isinstance(value, float) else str(value)
+    """Comparison-table cell: numbers always with 4 decimals (2.41 -> 2.4100, 0 -> 0.0000)."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return f"{float(value):.4f}"
+    return str(value)
+
+
+def round_floats(obj, ndigits: int = 4):
+    """Round every float in a (nested) results dict to 4 decimals for the JSON."""
+    if isinstance(obj, float):
+        return round(obj, ndigits)
+    if isinstance(obj, dict):
+        return {k: round_floats(v, ndigits) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [round_floats(v, ndigits) for v in obj]
+    return obj
 
 
 def train_mode(args) -> list[str]:
@@ -215,6 +242,37 @@ def main() -> None:
 
     results: dict[str, dict] = {}
 
+    out_dir = Path(args.out_dir).expanduser().resolve() if args.out_dir else RESULTS_DIR / "quant_experiment"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    def save_variant(file_stem: str, model, quant_method: str | None = None) -> None:
+        """Self-describing checkpoint (same {meta, state_dict} format as train.py and
+        the pruning experiment), loadable with factory.load_checkpoint.
+        Quantized arms are saved FOLDED: a copy is run through fold_qat, so the
+        Linear weights sit on the uint8 grid and the QATLinear wrappers are gone,
+        i.e. a plain float model (meta qat=False). The live model is untouched."""
+        to_save = model
+        if quant_method is not None:
+            to_save = copy.deepcopy(model)
+            n = fold_qat(to_save)
+            print(f"[Save] folded {n} QAT Linear layers for {file_stem}")
+        meta = {
+            "arch": args.arch,
+            "hparams": hparams,
+            "vocab_size": tokenizer.vocab_size(),
+            "pad_id": tokenizer.pad_id(),
+            "bos_id": tokenizer.bos_id(),
+            "eos_id": tokenizer.eos_id(),
+            "data_mode": "baseline",
+            "qat": False,                      # folded -> plain float model, no wrappers
+            "quantized": quant_method is not None,
+            "quant_method": quant_method,      # None | "qat" | "ptq"
+            "quant_folded": quant_method is not None,
+        }
+        path = out_dir / f"{args.arch}_{file_stem}.pt"
+        torch.save({"meta": meta, "state_dict": to_save.state_dict()}, path)
+        print(f"[Save] {file_stem} -> {path}")
+
     def evaluate_variant(name: str, model) -> None:
         set_qat_enabled(model, True)  # keep fake-quant ON at inference (no-op for fp32)
         row = {"val_loss": round(eval_val_loss(model, val_loader, criterion, device), 4)}
@@ -231,6 +289,7 @@ def main() -> None:
         baseline = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=False)
         make_trainer(baseline).train()
         evaluate_variant("baseline", baseline)
+        save_variant("baseline", baseline)
 
         # 3) PTQ: same fake-quant applied to the *trained* baseline + calibration only
         if args.ptq:
@@ -240,6 +299,7 @@ def main() -> None:
             ptq_model.to(device)          # move the new FakeQuantize buffers onto the device
             calibrate_ptq(ptq_model, train_loader, args.calib_batches, device)
             evaluate_variant("ptq", ptq_model)
+            save_variant("ptq", ptq_model, quant_method="ptq")
 
     if args.qat: 
         # 2) QAT: fresh model, fake-quant active during training (same seed init)
@@ -248,6 +308,7 @@ def main() -> None:
         qat_model = build_model(args.arch, tokenizer.vocab_size(), tokenizer.pad_id(), hparams, qat=True)
         make_trainer(qat_model).train()
         evaluate_variant("qat", qat_model)
+        save_variant("qat", qat_model, quant_method="qat")
 
 
     # ---- summary ------------------------------------------------------------
@@ -259,8 +320,6 @@ def main() -> None:
             if do_gen and "bleu" in r and "bleu" in base:
                 r["bleu_delta_vs_fp32"] = round(r["bleu"] - base["bleu"], 4)
 
-    out_dir = Path(args.out_dir).expanduser().resolve() if args.out_dir else RESULTS_DIR / "quant_experiment"
-    out_dir.mkdir(parents=True, exist_ok=True)
     payload = {
         "arch": args.arch,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -271,7 +330,7 @@ def main() -> None:
             "bleu_samples": args.bleu_samples, "calib_batches": args.calib_batches,
             "meteor": args.meteor, "hparams": hparams, "device": str(device),
         },
-        "results": results,
+        "results": round_floats(results),
     }
     out_path = out_dir / f"{args.arch}_qat_vs_ptq.json"
     save_json(out_path, payload)
@@ -292,7 +351,7 @@ def main() -> None:
             r = results[name]
             print(f"  {name}: val_loss {r['val_loss_delta_vs_fp32']:+.4f}"
                 + (f"   BLEU {r.get('bleu_delta_vs_fp32', float('nan')):+.4f}" if do_gen else ""))
-        print(f"\nSaved: {out_path}")
+    print(f"\nSaved: {out_path}")
 
 
 if __name__ == "__main__":

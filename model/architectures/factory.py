@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import torch
@@ -53,10 +54,20 @@ def build_model(
     return model
 
 
+def atomic_torch_save(obj, path: Path) -> None:
+    """torch.save via a temp file + rename, so a session killed mid-write (Colab
+    disconnect, Kaggle timeout) leaves the previous file intact instead of a
+    truncated one. The rename is atomic on local disks and on Drive."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    torch.save(obj, tmp)
+    os.replace(tmp, path)
+
+
 def save_checkpoint(path: Path, model: nn.Module, meta: dict) -> None:
     """Save weights plus everything needed to rebuild the model."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"meta": meta, "state_dict": model.state_dict()}, path)
+    atomic_torch_save({"meta": meta, "state_dict": model.state_dict()}, path)
 
 
 def load_checkpoint(path: Path, device: torch.device) -> tuple[nn.Module, dict]:

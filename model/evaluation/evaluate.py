@@ -13,13 +13,13 @@ wrong subword), so check translations.csv whenever scores look implausible.
 
 Usage:
     python -m model.evaluation.evaluate --checkpoint results/runs/<run>/best.pt \
-        [--tokenizer data/processed/2M/spm_en_id.model]
+        [--tokenizer data/processed/2M/spm_en_id.model] [--notes "Some notes about this evaluation"]
 """
 
 from __future__ import annotations
 
 import os
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1" 
 
 import argparse
 import csv

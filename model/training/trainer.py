@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import math
 import time
 from pathlib import Path
@@ -12,6 +13,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from common.results import save_json
 from model.architectures.factory import atomic_torch_save, save_checkpoint
 
 
@@ -200,6 +202,21 @@ class Trainer:
             path,
         )
 
+    def save_history(self) -> None:
+        """Per-epoch losses as history.json + history.csv in the run dir, rewritten
+        every epoch so a killed session still leaves them complete up to the last
+        finished epoch (for plotting; on --resume the history continues from
+        last.pt). Same history.json format train.py writes at the end of a run."""
+        save_json(
+            self.run_dir / "history.json",
+            {"best_val_loss": self.early_stopping.best_loss, "epochs": self.history},
+        )
+        columns = list(dict.fromkeys(key for record in self.history for key in record))
+        with open(self.run_dir / "history.csv", "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=columns)
+            writer.writeheader()
+            writer.writerows(self.history)
+
     def load_state(self, path: Path) -> int:
         """Restore a save_state() checkpoint. Returns the epoch to resume from."""
         state = torch.load(path, map_location=self.device, weights_only=False)
@@ -268,6 +285,7 @@ class Trainer:
                 if is_best:
                     save_checkpoint(self.run_dir / "best.pt", self.model, self.checkpoint_meta)
                 self.save_state(self.run_dir / "last.pt")
+                self.save_history()
 
             if self.early_stopping.should_stop:
                 if not self.quiet:

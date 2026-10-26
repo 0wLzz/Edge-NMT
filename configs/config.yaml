@@ -62,10 +62,19 @@ tokenizer:
 teacher:
   # Sequence-level KD: the teacher translates the training sources once,
   # and students train on (source, teacher_translation) pairs.
-  model_name: facebook/mbart-large-50-many-to-many-mmt
-  source_lang_code: en_XX
-  target_lang_code: id_ID
+  # NLLB-200 1.3B scores 45.35 BLEU / 77.12 METEOR on FLORES devtest (T4, fp16,
+  # beam 5; model/evaluation/evaluate_teacher.py) -- above every student baseline
+  # (best: LSTM 38.78). The first teacher, mBART-50 (35.34 / 70.58), was below
+  # the GRU/LSTM baselines, so KD from it capped those students. Its data stays
+  # in kd_train.tsv; to regenerate it set:
+  #   model_name: facebook/mbart-large-50-many-to-many-mmt, source_lang_code: en_XX,
+  #   target_lang_code: id_ID, output_file: kd_train.tsv
+  model_name: facebook/nllb-200-1.3B
+  source_lang_code: eng_Latn
+  target_lang_code: ind_Latn
+  output_file: kd_train_nllb-1.3B.tsv   # in data.processed_dir; one file per teacher
   batch_size: 32
+  chunk_size: 4096             # sources sorted by length per chunk (less padding); progress saved per chunk
   num_beams: 5
   max_new_tokens: 128
 

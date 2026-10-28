@@ -37,7 +37,9 @@ from pathlib import Path
 
 from torch.utils.data import DataLoader
 
-from common.config import load_config, pick_device, resolve_path, set_seed, getting_output_folder_name
+from common.config import (
+    DEFAULT_KD_FILE, getting_output_folder_name, load_config, pick_device, resolve_path, set_seed,
+)
 from common.results import RESULTS_DIR, create_run_dir, load_json, save_json
 from model.architectures.factory import build_model
 from model.pruning import MagnitudePruner
@@ -82,9 +84,10 @@ def load_best_hparams(arch: str, cfg: dict, override_path: str | None) -> dict:
     return default_hparams(space)
 
 
-def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device, dataset_dir=None):
+def make_loaders(cfg: dict, tokenizer, data_mode: str, batch_size: int, device, dataset_dir=None,
+                 kd_file: str = DEFAULT_KD_FILE):
     processed_dir = Path(dataset_dir) if dataset_dir else resolve_path(cfg["data"]["processed_dir"])
-    train_file = "kd_train.tsv" if data_mode == "kd" else "train.tsv"
+    train_file = kd_file if data_mode == "kd" else "train.tsv"
     max_length = cfg["training"]["max_sequence_length"]
 
     train_dataset = TranslationDataset(processed_dir / train_file, tokenizer, max_length)
@@ -106,6 +109,10 @@ def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arch", required=True, choices=["gru", "lstm", "transformer"])
     parser.add_argument("--data-mode", default="baseline", choices=["baseline", "kd"])
+    parser.add_argument("--kd-file", default=DEFAULT_KD_FILE,
+                        help="KD training file in the dataset dir for --data-mode kd (default: the "
+                        "mBART-50 kd_train.tsv; e.g. kd_train_nllb-1.3B.tsv). A non-default file "
+                        "adds its teacher to the run name, e.g. gru_kd-nllb-1.3B")
     parser.add_argument("--qat", action="store_true", help="Enable quantization-aware training")
     parser.add_argument(
         "--prune",
@@ -196,16 +203,22 @@ def main() -> None:
     # Getting Run Name
     run_name = getting_output_folder_name(args, target_sparsity)
 
+    kd_file = args.kd_file if args.data_mode == "kd" else None
+
     run_dir = find_resume_run_dir(args.resume, run_name)
-    # Getting Configurations and Hyperparameters 
+    # Getting Configurations and Hyperparameters
     if run_dir is not None:
         meta = load_json(run_dir / "run_config.json")
+        # Runs from before --kd-file have no kd_file key; their KD data was kd_train.tsv.
+        meta.setdefault("kd_file", DEFAULT_KD_FILE if meta.get("data_mode") == "kd" else None)
         for key, value in (
             ("arch", args.arch),
             ("data_mode", args.data_mode),
+            ("kd_file", kd_file),
             ("qat", args.qat),
             ("prune", args.prune),
-            ("target_sparsity", target_sparsity),
+            # Saved as 0.0 for runs without --prune (see checkpoint_meta below).
+            ("target_sparsity", target_sparsity if args.prune else 0.0),
         ):
             if meta.get(key, False) != value:
                 raise SystemExit(
@@ -225,7 +238,7 @@ def main() -> None:
 
     dataset_dir = Path(args.dataset_dir).expanduser().resolve() if args.dataset_dir else None
     train_loader, val_loader = make_loaders(
-        cfg, tokenizer, args.data_mode, hparams["batch_size"], device, dataset_dir
+        cfg, tokenizer, args.data_mode, hparams["batch_size"], device, dataset_dir, args.kd_file
     )
     
     model = build_model(
@@ -240,6 +253,7 @@ def main() -> None:
         "bos_id": tokenizer.bos_id(),
         "eos_id": tokenizer.eos_id(),
         "data_mode": args.data_mode,
+        "kd_file": kd_file,
         "qat": args.qat,
         "prune": args.prune,
         "target_sparsity": target_sparsity if args.prune else 0.0,

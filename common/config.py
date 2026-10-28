@@ -38,8 +38,17 @@ def pick_device() -> torch.device:
         return torch.device("mps")
     return torch.device("cpu")
 
+DEFAULT_KD_FILE = "kd_train.tsv"
+
+
 def getting_output_folder_name(args, target_sparsity: float) -> str:
-    run_name = f"{args.arch}_{args.data_mode}" + ("_qat" if args.qat else "")
+    data_mode = args.data_mode
+    # KD data from another teacher gets its own name (kd_train_nllb-1.3B.tsv ->
+    # "kd-nllb-1.3B"), so its runs never resume or mix with the default kd_train.tsv runs.
+    kd_file = getattr(args, "kd_file", DEFAULT_KD_FILE)
+    if data_mode == "kd" and kd_file != DEFAULT_KD_FILE:
+        data_mode += "-" + Path(kd_file).stem.removeprefix("kd_train").lstrip("_-")
+    run_name = f"{args.arch}_{data_mode}" + ("_qat" if args.qat else "")
     if args.prune:
         run_name += f"_prune{int(round(target_sparsity * 100))}"
 
